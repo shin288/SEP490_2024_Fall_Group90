@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/holo_orange_dark"
+    tools:context=".LoginActivity">
+
+    <LinearLayout
+        android:id="@+id/card_selection_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="128dp"
+        android:background="@android:color/white"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        >
+
+        <!-- Dòng chữ Choose Cards -->
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Email"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:height="48dp"
+            android:hint="Enter your email" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Password"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+
+        <!-- Thẻ thanh toán -->
+
+        <!-- Nút Proceed to Pay -->
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:height="48dp"
+            android:hint="Enter your password" />
+
+        <CheckBox
+            android:id="@+id/checkBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Remember Password ?"
+            android:textSize="10sp" />
+
+        <Button
+            android:id="@+id/btn_changepw"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@android:color/holo_orange_dark"
+            android:text="Login"
+            android:textColor="@android:color/white" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="Fingerprint Login"
+            app:srcCompat="@android:drawable/btn_star" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Or login with"
+            android:textColor="@android:color/darker_gray" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Don't have an account yet ? Register" />
+
+        <TextView
+            android:id="@+id/registerLink"
+            android:layout_width="51dp"
+            android:layout_height="wrap_content"
+            android:text="here"
+            android:textColor="@android:color/holo_orange_dark" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="410dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="138dp"
+        android:layout_height="69dp"
+        android:layout_marginTop="112dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="LOGIN"
+        android:textColor="@android:color/white"
+        android:textSize="48sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.131"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+

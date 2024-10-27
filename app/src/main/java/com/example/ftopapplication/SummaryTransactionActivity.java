@@ -2,11 +2,7 @@ package com.example.ftopapplication;
 
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class SummaryTransactionActivity extends AppCompatActivity {
 
@@ -16,7 +12,7 @@ public class SummaryTransactionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_summary_transaction);
 
         // action when click button "Proceed to Pay"
-        findViewById(R.id.btn_proceed_to_pay).setOnClickListener(v -> {
+        findViewById(R.id.btn_changepw).setOnClickListener(v -> {
             // action pay in here
         });
     }

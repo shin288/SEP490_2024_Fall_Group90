@@ -173,7 +173,7 @@
 
         <!-- Nút Proceed to Pay -->
         <Button
-            android:id="@+id/btn_proceed_to_pay"
+            android:id="@+id/btn_changepw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Proceed to Pay"
