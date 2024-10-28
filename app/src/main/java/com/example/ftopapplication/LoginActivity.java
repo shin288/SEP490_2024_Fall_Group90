@@ -27,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        imageButton = findViewById(R.id.imageButton);
+        imageButton = findViewById(R.id.fingerprintButton);
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
