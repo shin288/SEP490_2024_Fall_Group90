@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="balance_card" type="id" />
+    <item name="money_tracker_label" type="id" />
+    <item name="money_tracker_chart" type="id" />
+    <item name="transaction_history_label" type="id" />
+    <item name="transaction_history_container" type="id" />
+    <item name="see_all_transactions" type="id" />
+    <item name="bottom_navigation" type="id" />
+    <item name="today_transactions" type="id" />
+    <item name="today_label" type="id" />
+</resources>
