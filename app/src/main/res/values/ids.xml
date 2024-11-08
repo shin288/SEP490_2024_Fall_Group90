@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="income_label" type="id" />
-    <item name="income_value" type="id" />
-    <item name="expense_label" type="id" />
-    <item name="expense_value" type="id" />
-    <item name="btn_pay_again" type="id" />
-    <item name="btn_done" type="id" />
-    <item name="transaction_details" type="id" />
-    <item name="total_payment_amount" type="id" />
-    <item name="total_payment_label" type="id" />
-    <item name="payment_message" type="id" />
-    <item name="payment_receipt_title" type="id" />
-    <item name="success_icon" type="id" />
+    <item name="balance_card" type="id" />
+    <item name="money_tracker_label" type="id" />
+    <item name="money_tracker_chart" type="id" />
+    <item name="transaction_history_label" type="id" />
+    <item name="transaction_history_container" type="id" />
+    <item name="see_all_transactions" type="id" />
+    <item name="bottom_navigation" type="id" />
+    <item name="today_transactions" type="id" />
+    <item name="today_label" type="id" />
 </resources>

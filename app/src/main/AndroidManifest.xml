@@ -13,16 +13,43 @@
         android:theme="@style/Theme.FTOPApplication"
         tools:targetApi="31">
         <activity
-            android:name=".PaymentSuccessActivity"
+            android:name=".ConfirmPinActivity"
             android:exported="false" />
         <activity
-            android:name=".SummaryTransactionActivity"
+            android:name=".SetNewPinActivity"
             android:exported="false" />
         <activity
-            android:name=".ScanQrActivity"
+            android:name=".OtpVerificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgotPinActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.send.SendSuccessActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.send.SelectContactActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.send.SendActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.topup.TopUpSuccessActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.pinentry.PinEntryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.topup.TopUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.transaction.TransactionHistoryActivity"
             android:exported="false" />
         <activity
             android:name=".StaticActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,9 +57,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
     </application>
 
 </manifest>

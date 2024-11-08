@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/filter_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Transactions"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:paddingBottom="8dp" />
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/filter_this_week"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="This Week"
+            android:padding="8dp" />
+
+        <RadioButton
+            android:id="@+id/filter_this_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="This Month"
+            android:padding="8dp" />
+
+        <RadioButton
+            android:id="@+id/filter_past_three_months"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Past 3 Months"
+            android:padding="8dp" />
+
+        <RadioButton
+            android:id="@+id/filter_this_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="This Year"
+            android:padding="8dp" />
+
+        <RadioButton
+            android:id="@+id/filter_custom_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Custom Date"
+            android:padding="8dp" />
+    </RadioGroup>
+
+</LinearLayout>

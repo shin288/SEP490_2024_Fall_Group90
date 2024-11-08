@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Category"
+        android:textSize="18sp"
+        android:textColor="#000000" />
+
+    <RadioButton
+        android:id="@+id/food_drink"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Food and Drink" />
+
+    <RadioButton
+        android:id="@+id/supermarket"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Supermarket" />
+
+    <RadioButton
+        android:id="@+id/salon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Salon and nail" />
+
+    <RadioButton
+        android:id="@+id/others"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Other" />
+</LinearLayout>
