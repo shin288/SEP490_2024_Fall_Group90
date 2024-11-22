@@ -20,42 +20,49 @@
             android:exported="false" />
         <activity
             android:name=".OtpVerificationActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ForgotPinActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.send.SendSuccessActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.send.SelectContactActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.send.SendActivity"
-            android:exported="false" />
+            android:exported="true" >
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
         <activity
             android:name=".ui.topup.TopUpSuccessActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.pinentry.PinEntryActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.topup.TopUpActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.transaction.TransactionHistoryActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".StaticActivity"
-            android:exported="false" />
+            android:exported="true" >
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 

@@ -3,6 +3,7 @@ package com.example.ftopapplication.ui.send;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,59 +11,75 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ftopapplication.R;
-import com.example.ftopapplication.data.model.Contact;
-import com.example.ftopapplication.ui.send.adapter.ContactAdapter;
+import com.example.ftopapplication.data.model.User;
+import com.example.ftopapplication.data.repository.UserRepository;
+import com.example.ftopapplication.ui.pinentry.PinEntryActivity;
+import com.example.ftopapplication.ui.send.adapter.UserAdapter;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SelectContactActivity extends AppCompatActivity {
 
     private TextView tvAmount;
     private TextView categoryText;
     private Button btnSend;
-    private RecyclerView contactList;
-    private ContactAdapter contactAdapter;
-    private List<Contact> contacts;
+    private ImageView btnBack;
+    private RecyclerView userList;
+    private UserAdapter userAdapter;
+    private List<User> users;
     private String selectedContactName = "";
     private String selectedAccountNumber = "";
-    private String amount = "$10,000.00"; // Thay bằng số tiền thực từ người dùng nhập
+    private String selectedIdentifiedCode = "";
+    private float amount = 0.0f; // Số tiền chuyển từ Intent (float)
+
+    private UserRepository userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_contact);
 
+        // Ánh xạ các view
         tvAmount = findViewById(R.id.tv_amount);
         categoryText = findViewById(R.id.category_text);
         btnSend = findViewById(R.id.btn_send);
-        contactList = findViewById(R.id.contact_list);
+        btnBack = findViewById(R.id.btn_back);
+        userList = findViewById(R.id.contact_list);
 
-        // Lấy số tiền từ Intent và hiển thị
-        amount = getIntent().getStringExtra("amount");
-        tvAmount.setText(amount);
+        userRepository = new UserRepository();
 
-        // Hiển thị BottomSheet cho "Select Category"
+        // Lấy số tiền từ Intent
+        amount = getIntent().getFloatExtra("amount", 0.0f);
+        if (amount > 0) {
+            tvAmount.setText(String.format("%.2f đ", amount)); // Hiển thị số tiền với định dạng float
+        } else {
+            Toast.makeText(this, "No amount provided", Toast.LENGTH_SHORT).show();
+            finish(); // Đóng màn hình nếu không có số tiền
+        }
+
+        // Sự kiện nút quay lại
+        btnBack.setOnClickListener(v -> finish());
+
+        // Hiển thị BottomSheet để chọn danh mục
         findViewById(R.id.select_category).setOnClickListener(v -> showCategoryBottomSheet());
 
         // Cài đặt nút "Send"
         btnSend.setOnClickListener(v -> {
-            List<Contact> selectedContacts = contactAdapter.getSelectedContacts();
-            if (selectedContacts.isEmpty()) {
-                Toast.makeText(this, "Please select at least one contact", Toast.LENGTH_SHORT).show();
+            if (selectedIdentifiedCode.isEmpty()) {
+                Toast.makeText(this, "Please select a contact", Toast.LENGTH_SHORT).show();
             } else {
-                Contact selectedContact = selectedContacts.get(0); // Lấy liên hệ đầu tiên được chọn
-                selectedContactName = selectedContact.getName();
-                selectedAccountNumber = selectedContact.getPhoneNumber();
-
-                // Chuyển đến SendSuccessActivity
-                navigateToSendSuccess();
+                navigateToPinEntry();
             }
         });
 
-        // Thiết lập RecyclerView cho danh sách liên hệ
-        setupContactList();
+        // Thiết lập RecyclerView
+        setupUserList();
     }
 
     private void showCategoryBottomSheet() {
@@ -92,32 +109,50 @@ public class SelectContactActivity extends AppCompatActivity {
         bottomSheetDialog.show();
     }
 
-    private void setupContactList() {
-        contacts = new ArrayList<>();
-        // Tạo dữ liệu giả lập cho danh sách liên hệ
-        contacts.add(new Contact("Ronaldo", "0318-1608-2105"));
-        contacts.add(new Contact("Messi", "087562729264"));
-        contacts.add(new Contact("Công Phượng", "087562729265"));
-        contacts.add(new Contact("Quang Hải", "087562729266"));
+    private void setupUserList() {
+        users = new ArrayList<>();
 
-        // Khởi tạo adapter và thiết lập cho RecyclerView
-        contactAdapter = new ContactAdapter(this, contacts);
-        contactList.setLayoutManager(new LinearLayoutManager(this));
-        contactList.setAdapter(contactAdapter);
+        // Khởi tạo adapter và gắn vào RecyclerView
+        userAdapter = new UserAdapter(users);
+        userAdapter.setOnUserClickListener(user -> {
+            selectedContactName = user.getName();
+            selectedAccountNumber = String.valueOf(user.getPhoneNumber());
+            selectedIdentifiedCode = String.valueOf(user.getIdentifiedCode());
+            btnSend.setEnabled(true);
+            btnSend.setBackgroundResource(R.drawable.button_background); // Thay đổi màu nút
+        });
 
-        // Lắng nghe thay đổi danh sách liên hệ được chọn và cập nhật nút Send
-        contactAdapter.setOnSelectedContactsChangeListener(selectedCount -> {
-            btnSend.setEnabled(selectedCount > 0);
-            btnSend.setBackgroundResource(selectedCount > 0 ? R.drawable.button_background : R.drawable.button_background_disabled);
+        userList.setLayoutManager(new LinearLayoutManager(this));
+        userList.setAdapter(userAdapter);
+
+        // Lấy danh sách người dùng từ API
+        fetchUsersFromApi();
+    }
+
+    private void fetchUsersFromApi() {
+        userRepository.getAllUsers().enqueue(new Callback<List<User>>() {
+            @Override
+            public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    users.clear();
+                    users.addAll(response.body());
+                    userAdapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(SelectContactActivity.this, "Failed to fetch users", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<User>> call, Throwable t) {
+                Toast.makeText(SelectContactActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
-    private void navigateToSendSuccess() {
-        Intent intent = new Intent(this, SendSuccessActivity.class);
-        intent.putExtra("amount", amount);
-        intent.putExtra("name", selectedContactName);
-        intent.putExtra("account_number", selectedAccountNumber);
-        intent.putExtra("time", "3:02 PM"); // Bạn có thể đặt giờ động dựa trên thời gian thực
+    private void navigateToPinEntry() {
+        Intent intent = new Intent(this, PinEntryActivity.class);
+        intent.putExtra("identified_code", selectedIdentifiedCode); // Truyền mã định danh
+        intent.putExtra("amount", amount); // Truyền số tiền (float)
         startActivity(intent);
     }
 }

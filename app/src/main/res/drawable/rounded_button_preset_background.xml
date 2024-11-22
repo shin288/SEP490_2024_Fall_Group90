@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="25dp" /> <!-- Bo tròn rõ ràng hơn -->
+    <solid android:color="#F5F5F5" /> <!-- Màu nền sáng hơn -->
+    <stroke android:width="2dp" android:color="#DDA0DD" /> <!-- Viền nhạt -->
+</shape>

@@ -4,7 +4,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A73E8">
+    android:background="#1F6CFF">
 
     <!-- Instruction Text -->
     <TextView
@@ -60,43 +60,43 @@
         <!-- Dot Views for PIN display -->
         <View
             android:id="@+id/dot1"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:background="@drawable/dot_empty"
             android:layout_margin="8dp" />
 
         <View
             android:id="@+id/dot2"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:background="@drawable/dot_empty"
             android:layout_margin="8dp" />
 
         <View
             android:id="@+id/dot3"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:background="@drawable/dot_empty"
             android:layout_margin="8dp" />
 
         <View
             android:id="@+id/dot4"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:background="@drawable/dot_empty"
             android:layout_margin="8dp" />
 
         <View
             android:id="@+id/dot5"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:background="@drawable/dot_empty"
             android:layout_margin="8dp" />
 
         <View
             android:id="@+id/dot6"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:background="@drawable/dot_empty"
             android:layout_margin="8dp" />
     </LinearLayout>

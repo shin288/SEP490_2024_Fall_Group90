@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-</selector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#FFFFFF" /> <!-- Màu trắng cho trạng thái filled -->
+    <corners android:radius="20dp" /> <!-- Hình tròn -->
+    <size
+        android:width="20dp"
+        android:height="20dp" />
+</shape>

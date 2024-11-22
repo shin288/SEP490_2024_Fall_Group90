@@ -1,4 +1,4 @@
-package com.example.ftopapplication;
+package com.example.ftopapplication.ui.pinentry;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,25 +11,43 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.ftopapplication.ForgotPinActivity;
+import com.example.ftopapplication.R;
+import com.example.ftopapplication.data.model.User;
+import com.example.ftopapplication.data.repository.UserRepository;
+import com.example.ftopapplication.ui.send.SelectContactActivity;
 import com.example.ftopapplication.ui.send.SendSuccessActivity;
 import com.example.ftopapplication.ui.topup.TopUpSuccessActivity;
-import com.example.ftopapplication.ui.send.SelectContactActivity;
 import com.example.ftopapplication.ui.shared.fragment.NumberPadFragment;
 import com.example.ftopapplication.ui.topup.TopUpActivity;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PinEntryActivity extends AppCompatActivity implements NumberPadFragment.OnNumberPadClickListener {
     private View[] pinDots;
     private StringBuilder enteredPin = new StringBuilder();
     private TextView pinErrorMessage;
     private String caller;
+    private double amountToSend;
+    private double userBalance;
+    private int userId; // ID người dùng để lấy mã PIN từ API
+
+    private UserRepository userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pin_entry);
 
-        // Lấy tên màn hình gọi đến PinEntryActivity
+        // Lấy thông tin Intent
         caller = getIntent().getStringExtra("caller");
+        amountToSend = getIntent().getDoubleExtra("amount", 0.0); // Số tiền cần gửi
+        userBalance = getIntent().getDoubleExtra("balance", 0.0); // Số dư tài khoản người dùng
+        userId = getIntent().getIntExtra("user_id", -1); // ID người dùng
+
+        userRepository = new UserRepository();
 
         // Thiết lập padding cho hệ thống
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -64,7 +82,6 @@ public class PinEntryActivity extends AppCompatActivity implements NumberPadFrag
         // Xử lý sự kiện "Forgot Pin?"
         TextView forgotPinText = findViewById(R.id.tv_forgot_pin);
         forgotPinText.setOnClickListener(v -> {
-            // Điều hướng đến ForgotPinActivity khi người dùng nhấn "Forgot Pin?"
             startActivity(new Intent(this, ForgotPinActivity.class));
         });
 
@@ -94,9 +111,9 @@ public class PinEntryActivity extends AppCompatActivity implements NumberPadFrag
     private void updatePinDisplay() {
         for (int i = 0; i < pinDots.length; i++) {
             if (i < enteredPin.length()) {
-                pinDots[i].setBackgroundResource(R.drawable.dot_filled);  // Hiển thị dấu chấm đã nhập
+                pinDots[i].setBackgroundResource(R.drawable.dot_filled); // Hiển thị dấu chấm đã nhập
             } else {
-                pinDots[i].setBackgroundResource(R.drawable.dot_empty);   // Hiển thị dấu chấm trống
+                pinDots[i].setBackgroundResource(R.drawable.dot_empty); // Hiển thị dấu chấm trống
             }
         }
 
@@ -106,39 +123,52 @@ public class PinEntryActivity extends AppCompatActivity implements NumberPadFrag
         }
     }
 
-
     private void verifyPin() {
-        String correctPin = "123456"; // Mã PIN đúng giả định
-        if (enteredPin.toString().equals(correctPin)) {
-            if ("SendActivity".equals(caller)) {
-                // Kiểm tra số dư nếu đến từ SendActivity
-                double balance = 5000.00;
-                double amountToSend = 10000.00; // Giả sử số tiền cần gửi
-                if (amountToSend > balance) {
-                    // Hiển thị thông báo khi số dư không đủ
-                    Toast.makeText(this, "Send failed, please try again later or check your connection", Toast.LENGTH_LONG).show();
-                    finish();
+        userRepository.getUserById(userId).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String correctPin = response.body().getIdentifiedCode(); // Mã PIN từ API
+                    if (enteredPin.toString().equals(correctPin)) {
+                        handleCorrectPin();
+                    } else {
+                        displayPinError();
+                    }
                 } else {
-                    // Chuyển sang màn hình thành công khi gửi thành công
-                    Intent intent = new Intent(this, SendSuccessActivity.class);
-                    intent.putExtra("amount", "$" + amountToSend);
-                    intent.putExtra("balance", "$" + balance);
-                    startActivity(intent);
-                    finish();
+                    Toast.makeText(PinEntryActivity.this, "Failed to verify PIN. Please try again.", Toast.LENGTH_SHORT).show();
                 }
-            } else if ("TopUpActivity".equals(caller)) {
-                // Thành công trong trường hợp Top-Up
-                Intent intent = new Intent(this, TopUpSuccessActivity.class);
-                intent.putExtra("amount", "$100.00"); // Giả sử số tiền nạp
-                intent.putExtra("balance", "$5000.00"); // Giả sử số dư mới sau khi nạp
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Toast.makeText(PinEntryActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void handleCorrectPin() {
+        if ("SendActivity".equals(caller)) {
+            if (amountToSend > userBalance) {
+                Toast.makeText(this, "Insufficient balance for this transaction.", Toast.LENGTH_LONG).show();
+            } else {
+                Intent intent = new Intent(this, SendSuccessActivity.class);
+                intent.putExtra("amount", amountToSend);
+                intent.putExtra("remaining_balance", userBalance - amountToSend);
                 startActivity(intent);
                 finish();
             }
-        } else {
-            // Hiển thị lỗi mã PIN không đúng
-            pinErrorMessage.setVisibility(View.VISIBLE); // Hiển thị TextView lỗi
-            enteredPin.setLength(0); // Xóa mã PIN đã nhập
-            updatePinDisplay();
+        } else if ("TopUpActivity".equals(caller)) {
+            Intent intent = new Intent(this, TopUpSuccessActivity.class);
+            intent.putExtra("amount", amountToSend);
+            intent.putExtra("new_balance", userBalance + amountToSend);
+            startActivity(intent);
+            finish();
         }
+    }
+
+    private void displayPinError() {
+        pinErrorMessage.setVisibility(View.VISIBLE); // Hiển thị lỗi mã PIN không đúng
+        enteredPin.setLength(0); // Xóa mã PIN đã nhập
+        updatePinDisplay();
     }
 }
