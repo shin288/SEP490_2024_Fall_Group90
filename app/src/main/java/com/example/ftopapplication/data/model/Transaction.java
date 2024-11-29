@@ -4,22 +4,24 @@ import java.util.Date;
 
 public class Transaction {
     private int transactionId;
-    private User senderId;          // ID người gửi
-    private User receiverId;        // ID người nhận
-    private float amount;          // Số tiền giao dịch
-    private String description;    // Ghi chú giao dịch
+    private int transferUserId;  // ID người gửi (sửa từ User senderId)
+    private int receiveUserId;   // ID người nhận (sửa từ User receiverId)
+    private float transactionAmount; // Số tiền giao dịch (sửa từ amount)
+    private String transactionDescription; // Ghi chú giao dịch (sửa từ description)
     private Date transactionDate;  // Ngày giao dịch
     private boolean status;        // Trạng thái giao dịch (thành công/thất bại)
 
-    public Transaction(int transactionId, User senderId, User receiverId, float amount, String description, Date transactionDate, boolean status) {
+    public Transaction(int transactionId, int transferUserId, int receiveUserId, float transactionAmount, String transactionDescription, Date transactionDate, boolean status) {
         this.transactionId = transactionId;
-        this.senderId = senderId;
-        this.receiverId = receiverId;
-        this.amount = amount;
-        this.description = description;
+        this.transferUserId = transferUserId;
+        this.receiveUserId = receiveUserId;
+        this.transactionAmount = transactionAmount;
+        this.transactionDescription = transactionDescription;
         this.transactionDate = transactionDate;
         this.status = status;
     }
+
+    public Transaction(){}
 
     public int getTransactionId() {
         return transactionId;
@@ -29,36 +31,36 @@ public class Transaction {
         this.transactionId = transactionId;
     }
 
-    public User getReceiverId() {
-        return receiverId;
+    public int getTransferUserId() {
+        return transferUserId;
     }
 
-    public void setReceiverId(User receiverId) {
-        this.receiverId = receiverId;
+    public void setTransferUserId(int transferUserId) {
+        this.transferUserId = transferUserId;
     }
 
-    public User getSenderId() {
-        return senderId;
+    public int getReceiveUserId() {
+        return receiveUserId;
     }
 
-    public void setSenderId(User senderId) {
-        this.senderId = senderId;
+    public void setReceiveUserId(int receiveUserId) {
+        this.receiveUserId = receiveUserId;
     }
 
-    public float getAmount() {
-        return amount;
+    public float getTransactionAmount() {
+        return transactionAmount;
     }
 
-    public void setAmount(float amount) {
-        this.amount = amount;
+    public void setTransactionAmount(float transactionAmount) {
+        this.transactionAmount = transactionAmount;
     }
 
-    public String getDescription() {
-        return description;
+    public String getTransactionDescription() {
+        return transactionDescription;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setTransactionDescription(String transactionDescription) {
+        this.transactionDescription = transactionDescription;
     }
 
     public Date getTransactionDate() {

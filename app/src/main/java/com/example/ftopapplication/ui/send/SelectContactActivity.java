@@ -34,9 +34,12 @@ public class SelectContactActivity extends AppCompatActivity {
     private UserAdapter userAdapter;
     private List<User> users;
 
-    private String selectedContactName = ""; // Tên người nhận
-    private String selectedContactPhone = ""; // Số điện thoại người nhận
-    private float amount = 0.0f; // Số tiền
+    private String selectedContactName = ""; // Recipient's name
+    private String selectedContactPhone = ""; // Recipient's phone number
+    private int transferUserId = 1; // Default sender ID
+    private int selectedContactId = -1; // Recipient's ID
+    private float transferUserBalance = 0.0f; // Sender's balance
+    private float amount = 0.0f; // Transaction amount
 
     private UserRepository userRepository;
 
@@ -45,7 +48,7 @@ public class SelectContactActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_contact);
 
-        // Ánh xạ các view
+        // Map views
         tvAmount = findViewById(R.id.tv_amount);
         btnSend = findViewById(R.id.btn_send);
         btnBack = findViewById(R.id.btn_back);
@@ -53,51 +56,60 @@ public class SelectContactActivity extends AppCompatActivity {
 
         userRepository = new UserRepository();
 
-        // Lấy số tiền từ Intent
+        // Get the amount from the Intent
         amount = getIntent().getFloatExtra("amount", 0.0f);
         if (amount > 0) {
-            tvAmount.setText(String.format("%.2f đ", amount)); // Hiển thị số tiền
+            tvAmount.setText(String.format("%.2f đ", amount)); // Display the amount
         } else {
-            Toast.makeText(this, "Không có số tiền hợp lệ", Toast.LENGTH_SHORT).show();
-            finish();
+            Toast.makeText(this, "No valid amount specified", Toast.LENGTH_SHORT).show();
+            finish(); // End the activity if no amount is provided
         }
 
-        btnSend.setEnabled(false); // Không thể click
-        btnSend.setBackgroundResource(R.drawable.button_continue_disabled);
-        // Nút quay lại
+        // Fetch sender's balance from the API
+        fetchTransferUserBalance();
+
+        // Back button
         btnBack.setOnClickListener(v -> finish());
 
-        // Nút gửi
+        // Send button
+        btnSend.setEnabled(false); // Disable send button initially
+        btnSend.setBackgroundResource(R.drawable.button_continue_disabled);
         btnSend.setOnClickListener(v -> {
-            if (selectedContactName.isEmpty() || selectedContactPhone.isEmpty()) {
-                Toast.makeText(this, "Vui lòng chọn một người nhận", Toast.LENGTH_SHORT).show();
+
+            if (selectedContactId == transferUserId) {
+                Toast.makeText(this, "You cannot send money to yourself", Toast.LENGTH_SHORT).show();
+            } else if (selectedContactName.isEmpty() || selectedContactPhone.isEmpty()) {
+                Toast.makeText(this, "Please select a recipient", Toast.LENGTH_SHORT).show();
             } else {
-                navigateToPinEntry();
+                navigateToPinEntry(); // Navigate to the PIN entry screen
             }
         });
 
-        // Thiết lập RecyclerView
+        // Set up RecyclerView
         setupUserList();
     }
 
     private void setupUserList() {
         users = new ArrayList<>();
 
-        // Khởi tạo adapter và gắn vào RecyclerView
+        // Initialize the adapter and attach it to the RecyclerView
         userAdapter = new UserAdapter(users);
         userList.setLayoutManager(new LinearLayoutManager(this));
         userList.setAdapter(userAdapter);
 
-        // Lấy danh sách người dùng từ API
+        // Fetch users from the API
         fetchUsersFromApi();
 
-        // Thêm sự kiện click vào item
+        // Item click event
         userAdapter.setOnUserClickListener(user -> {
-            selectedContactName = user.getDisplayName(); // Lấy tên người nhận
-            selectedContactPhone = user.getPhoneNumber(); // Lấy số điện thoại người nhận
+            selectedContactName = user.getDisplayName(); // Get recipient's name
+            selectedContactPhone = user.getPhoneNumber(); // Get recipient's phone number
+            selectedContactId = user.getId(); // Get recipient's ID
 
+
+            // Enable send button and update button UI
             btnSend.setEnabled(true);
-            btnSend.setBackgroundResource(R.drawable.button_background); // Thay đổi màu nút
+            btnSend.setBackgroundResource(R.drawable.button_background); // Update button color
         });
     }
 
@@ -108,26 +120,51 @@ public class SelectContactActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     users.clear();
                     users.addAll(response.body());
-                    userAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu trong adapter
+                    userAdapter.notifyDataSetChanged(); // Update data in adapter
 
                     Log.d("SelectContactActivity", "Fetched users: " + users.size());
                 } else {
-                    Toast.makeText(SelectContactActivity.this, "Không thể lấy danh sách người dùng", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SelectContactActivity.this, "Unable to fetch user list", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<User>> call, Throwable t) {
-                Toast.makeText(SelectContactActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SelectContactActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    private void fetchTransferUserBalance() {
+        userRepository.getUserById(transferUserId).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    transferUserBalance = response.body().getWalletBalance(); // Get balance from API
+                    Log.d("SelectContactActivity", "Sender's balance: " + transferUserBalance);
+                } else {
+                    Toast.makeText(SelectContactActivity.this, "Unable to fetch sender's information", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Toast.makeText(SelectContactActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
     private void navigateToPinEntry() {
+
+
         Intent intent = new Intent(this, PinEntryActivity.class);
-        intent.putExtra("receiver_name", selectedContactName); // Truyền tên người nhận
-        intent.putExtra("receiver_phone", selectedContactPhone); // Truyền số điện thoại người nhận
-        intent.putExtra("amount", amount); // Truyền số tiền
+        intent.putExtra("transfer_user_id", transferUserId); // Pass sender ID
+        intent.putExtra("receiver_user_id", selectedContactId); // Key cho Receiver User ID
+        intent.putExtra("receiver_name", selectedContactName); // Pass recipient's name
+        intent.putExtra("receiver_phone", selectedContactPhone); // Pass recipient's phone number
+        intent.putExtra("current_balance", transferUserBalance); // Pass sender's balance
+        intent.putExtra("amount", amount); // Pass amount
         startActivity(intent);
     }
 }

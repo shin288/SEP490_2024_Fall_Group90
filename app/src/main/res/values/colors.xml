@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="blue_background">#1565C0</color> <!-- Màu nền tổng thể -->
+    <color name="blue_border">#1E88E5</color> <!-- Màu viền xanh -->
+    <color name="blue_pressed">#0D47A1</color> <!-- Màu nền khi nhấn -->
+
 </resources>

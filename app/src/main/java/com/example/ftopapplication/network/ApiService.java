@@ -26,7 +26,7 @@ public interface ApiService {
     Call<User> searchUserByPhoneNumber(@Query("phone") String phoneNumber);
 
     // Endpoint lấy thông tin chi tiết người dùng theo ID
-    @GET("/users/{id}")
+    @GET("/api/user/findUser/{id}")
     Call<User> getUserById(@Path("id") int userId);
 
     // Endpoint tạo giao dịch
@@ -45,6 +45,6 @@ public interface ApiService {
     Call<List<Transaction>> getTransactionsByTransferUserId(@Path("userId") int userId);
 
     // API chuyển tiền
-    @POST("transactions/transfer-money")
+    @POST("api/transaction/transfer")
     Call<Transaction> transferMoney(@Body Transaction transaction);
 }

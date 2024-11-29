@@ -30,6 +30,7 @@
         <activity
             android:name=".ui.send.SendSuccessActivity"
             android:exported="true" />
+
         <activity
             android:name=".ui.send.SelectContactActivity"
             android:exported="true" />
