@@ -4,15 +4,14 @@ import java.util.Date;
 
 public class Transaction {
     private int transactionId;
-    private int senderId;          // ID người gửi
-    private int receiverId;        // ID người nhận
+    private User senderId;          // ID người gửi
+    private User receiverId;        // ID người nhận
     private float amount;          // Số tiền giao dịch
     private String description;    // Ghi chú giao dịch
     private Date transactionDate;  // Ngày giao dịch
     private boolean status;        // Trạng thái giao dịch (thành công/thất bại)
 
-    // Constructor
-    public Transaction(int transactionId, int senderId, int receiverId, float amount, String description, Date transactionDate, boolean status) {
+    public Transaction(int transactionId, User senderId, User receiverId, float amount, String description, Date transactionDate, boolean status) {
         this.transactionId = transactionId;
         this.senderId = senderId;
         this.receiverId = receiverId;
@@ -22,7 +21,6 @@ public class Transaction {
         this.status = status;
     }
 
-    // Getters và Setters
     public int getTransactionId() {
         return transactionId;
     }
@@ -31,20 +29,20 @@ public class Transaction {
         this.transactionId = transactionId;
     }
 
-    public int getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
-    }
-
-    public int getReceiverId() {
+    public User getReceiverId() {
         return receiverId;
     }
 
-    public void setReceiverId(int receiverId) {
+    public void setReceiverId(User receiverId) {
         this.receiverId = receiverId;
+    }
+
+    public User getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(User senderId) {
+        this.senderId = senderId;
     }
 
     public float getAmount() {

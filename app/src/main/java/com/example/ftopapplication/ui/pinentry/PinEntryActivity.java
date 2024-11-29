@@ -128,7 +128,7 @@ public class PinEntryActivity extends AppCompatActivity implements NumberPadFrag
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    String correctPin = response.body().getIdentifiedCode(); // Mã PIN từ API
+                    String correctPin = response.body().getPassword(); // Mã PIN từ API
                     if (enteredPin.toString().equals(correctPin)) {
                         handleCorrectPin();
                     } else {

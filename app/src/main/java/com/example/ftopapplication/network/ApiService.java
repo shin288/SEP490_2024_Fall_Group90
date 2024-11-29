@@ -14,7 +14,7 @@ import retrofit2.http.Query;
 
 public interface ApiService {
     // Endpoint lấy danh sách người dùng
-    @GET("/users")
+    @GET("/api/user/findUser")
     Call<List<User>> getUsers();
 
     // Endpoint tìm kiếm người dùng theo tên
@@ -40,4 +40,11 @@ public interface ApiService {
     // Endpoint lấy chi tiết giao dịch
     @GET("/transactions/{transactionId}")
     Call<Transaction> getTransactionById(@Path("transactionId") int transactionId);
+
+    @GET("transactions/transfer-user/{userId}")
+    Call<List<Transaction>> getTransactionsByTransferUserId(@Path("userId") int userId);
+
+    // API chuyển tiền
+    @POST("transactions/transfer-money")
+    Call<Transaction> transferMoney(@Body Transaction transaction);
 }
