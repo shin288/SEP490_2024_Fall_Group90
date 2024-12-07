@@ -16,7 +16,7 @@ import com.example.ftopapplication.R;
 import com.example.ftopapplication.data.model.User;
 import com.example.ftopapplication.data.repository.UserRepository;
 import com.example.ftopapplication.ui.pinentry.PinEntryActivity;
-import com.example.ftopapplication.ui.send.adapter.UserAdapter;
+import com.example.ftopapplication.adapter.UserAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class SelectContactActivity extends AppCompatActivity {
 
     private String selectedContactName = ""; // Recipient's name
     private String selectedContactPhone = ""; // Recipient's phone number
-    private int transferUserId = 1; // Default sender ID
+    private int transferUserId = 4; // Default sender ID
     private int selectedContactId = -1; // Recipient's ID
     private float transferUserBalance = 0.0f; // Sender's balance
     private float amount = 0.0f; // Transaction amount

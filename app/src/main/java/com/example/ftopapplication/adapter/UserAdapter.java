@@ -1,4 +1,4 @@
-package com.example.ftopapplication.ui.send.adapter;
+package com.example.ftopapplication.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;

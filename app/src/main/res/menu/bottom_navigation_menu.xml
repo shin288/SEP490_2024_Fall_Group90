@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_home"
+        android:icon="@drawable/ic_home"
+        android:title="Home" />
+    <item
+        android:id="@+id/menu_cashflow"
+        android:icon="@drawable/ic_cashflow"
+        android:title="Cashflow" />
+    <item
+        android:id="@+id/menu_pay"
+
+        android:icon="@drawable/ic_pay"
+        android:title="Pay"
+        />
+    <item
+        android:id="@+id/menu_message"
+        android:icon="@drawable/ic_message"
+        android:title="Message" />
+    <item
+        android:id="@+id/menu_profile"
+        android:icon="@drawable/ic_profile"
+        android:title="Profile" />
+</menu>

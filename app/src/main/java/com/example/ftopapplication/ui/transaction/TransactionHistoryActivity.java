@@ -2,20 +2,35 @@ package com.example.ftopapplication.ui.transaction;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import java.util.stream.Collectors;
+
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.ftopapplication.R;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.example.ftopapplication.data.model.Transaction;
+import com.example.ftopapplication.data.repository.TransactionRepository;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TransactionHistoryActivity extends AppCompatActivity {
 
     private Button btnAll, btnIncome, btnExpense;
-    private ImageView btnFilter;
+    private LinearLayout transactionListContainer;
+    private TransactionRepository transactionRepository;
+    private ImageView btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,30 +40,95 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         btnAll = findViewById(R.id.btn_all);
         btnIncome = findViewById(R.id.btn_income);
         btnExpense = findViewById(R.id.btn_expense);
-        btnFilter = findViewById(R.id.btn_filter);
+        transactionListContainer = findViewById(R.id.transaction_list_container);
 
-        // Thiết lập mặc định ban đầu là hiển thị tất cả giao dịch
+        transactionRepository = new TransactionRepository();
+
+        // Hiển thị tất cả giao dịch mặc định
         setActiveButton(btnAll);
-        showAllTransactions();
+        fetchTransactions("all");
 
-        // Logic cho các nút filter
+        // Nút lọc
         btnAll.setOnClickListener(v -> {
             setActiveButton(btnAll);
-            showAllTransactions();
+            fetchTransactions("all");
         });
+
         btnIncome.setOnClickListener(v -> {
             setActiveButton(btnIncome);
-            showIncomeTransactions();
+            fetchTransactions("income");
         });
+
         btnExpense.setOnClickListener(v -> {
             setActiveButton(btnExpense);
-            showExpenseTransactions();
+            fetchTransactions("expense");
         });
-        btnFilter.setOnClickListener(v -> showFilterBottomSheet());
+
+
+        setContentView(R.layout.activity_transaction_history);
+
+        btnBack = findViewById(R.id.btn_back); // Ánh xạ nút Back
+
+        btnBack.setOnClickListener(v -> finish()); // Quay lại màn trước
+    }
+
+    private void fetchTransactions(String filterType) {
+        int userId = 1; // Thay thế bằng ID người dùng thực tế
+        transactionRepository.getAllTransactionsForUser(userId).enqueue(new Callback<List<Transaction>>() {
+            @Override
+            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Transaction> transactions = response.body();
+                    if ("income".equals(filterType)) {
+                        updateTransactionList(filterTransactions(transactions, true));
+                    } else if ("expense".equals(filterType)) {
+                        updateTransactionList(filterTransactions(transactions, false));
+                    } else {
+                        updateTransactionList(transactions);
+                    }
+                } else {
+                    Toast.makeText(TransactionHistoryActivity.this, "Failed to load transactions", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                Toast.makeText(TransactionHistoryActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private List<Transaction> filterTransactions(List<Transaction> transactions, boolean isIncome) {
+        return transactions.stream()
+                .filter(transaction -> transaction.isStatus() == isIncome)
+                .collect(Collectors.toList());
+    }
+
+
+    private void updateTransactionList(List<Transaction> transactions) {
+        transactionListContainer.removeAllViews(); // Xóa giao dịch cũ
+
+        for (Transaction transaction : transactions) {
+            View transactionItemView = LayoutInflater.from(this).inflate(R.layout.transaction_item, transactionListContainer, false);
+
+            TextView titleTextView = transactionItemView.findViewById(R.id.transaction_title);
+            TextView dateTextView = transactionItemView.findViewById(R.id.transaction_date);
+            TextView amountTextView = transactionItemView.findViewById(R.id.transaction_amount);
+            ImageView iconImageView = transactionItemView.findViewById(R.id.transaction_icon);
+
+            // Thiết lập dữ liệu
+            titleTextView.setText(transaction.getTransactionDescription());
+            dateTextView.setText(transaction.getTransactionDate().toString()); // Định dạng nếu cần
+            amountTextView.setText((transaction.isStatus() ? "+" : "-") + "$" + transaction.getTransactionAmount());
+            amountTextView.setTextColor(transaction.isStatus() ? Color.parseColor("#008000") : Color.parseColor("#FF0000"));
+            iconImageView.setImageResource(transaction.isStatus() ? R.drawable.ic_income : R.drawable.ic_expense);
+
+            // Thêm vào danh sách
+            transactionListContainer.addView(transactionItemView);
+        }
     }
 
     private void setActiveButton(Button activeButton) {
-        // Đặt lại màu nền cho tất cả các nút
         btnAll.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button_background_disabled));
         btnIncome.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button_background_disabled));
         btnExpense.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button_background_disabled));
@@ -57,69 +137,8 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         btnIncome.setTextColor(Color.parseColor("#888888"));
         btnExpense.setTextColor(Color.parseColor("#888888"));
 
-        // Đặt màu nền cho nút đang được chọn
         activeButton.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button_background));
         activeButton.setTextColor(Color.parseColor("#FFA500"));
     }
 
-    private void showAllTransactions() {
-        // Thực hiện hiển thị tất cả giao dịch
-        // TODO: Thêm logic để hiển thị danh sách tất cả giao dịch
-    }
-
-    private void showIncomeTransactions() {
-        // Thực hiện hiển thị các giao dịch thu nhập
-        // TODO: Thêm logic để hiển thị danh sách giao dịch thu nhập
-    }
-
-    private void showExpenseTransactions() {
-        // Thực hiện hiển thị các giao dịch chi tiêu
-        // TODO: Thêm logic để hiển thị danh sách giao dịch chi tiêu
-    }
-
-    private void showFilterBottomSheet() {
-        BottomSheetDialog filterDialog = new BottomSheetDialog(this);
-        View view = getLayoutInflater().inflate(R.layout.filter_bottom_sheet, null);
-        filterDialog.setContentView(view);
-
-        TextView thisWeek = view.findViewById(R.id.filter_this_week);
-        TextView thisMonth = view.findViewById(R.id.filter_this_month);
-        TextView pastThreeMonths = view.findViewById(R.id.filter_past_three_months);
-        TextView thisYear = view.findViewById(R.id.filter_this_year);
-        TextView customDate = view.findViewById(R.id.filter_custom_date);
-
-        // Set click listeners cho từng tuỳ chọn bộ lọc
-        thisWeek.setOnClickListener(v -> {
-            // Lọc theo tuần này
-            filterDialog.dismiss();
-        });
-
-        thisMonth.setOnClickListener(v -> {
-            // Lọc theo tháng này
-            filterDialog.dismiss();
-        });
-
-        pastThreeMonths.setOnClickListener(v -> {
-            // Lọc theo 3 tháng trước
-            filterDialog.dismiss();
-        });
-
-        thisYear.setOnClickListener(v -> {
-            // Lọc theo năm này
-            filterDialog.dismiss();
-        });
-
-        customDate.setOnClickListener(v -> {
-            // Mở bộ chọn ngày tuỳ chỉnh
-            filterDialog.dismiss();
-            showCustomDatePicker();
-        });
-
-        filterDialog.show();
-    }
-
-    private void showCustomDatePicker() {
-        // Implement custom date picker dialog here
-        // You can use a DatePickerDialog to select start and end dates
-    }
 }

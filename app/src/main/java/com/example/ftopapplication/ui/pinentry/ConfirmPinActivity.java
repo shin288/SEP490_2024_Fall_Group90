@@ -1,12 +1,12 @@
-package com.example.ftopapplication;
+package com.example.ftopapplication.ui.pinentry;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.ftopapplication.R;
 import com.example.ftopapplication.ui.shared.fragment.NumberPadFragment;
 
 import java.util.ArrayList;

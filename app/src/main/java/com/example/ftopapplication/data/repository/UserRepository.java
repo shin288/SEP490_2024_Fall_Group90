@@ -35,4 +35,8 @@ public class UserRepository {
     public Call<User> searchUserByPhoneNumber(String phoneNumber) {
         return apiService.searchUserByPhoneNumber(phoneNumber);
     }
+
+    public Call<User> loginUser(User user){
+        return apiService.loginUser(user);
+    }
 }

@@ -8,13 +8,15 @@ public class User {
     private String phoneNumber;
     private String role;
     private String password;
+    private int pin;
     private int walletBalance;
     private boolean isActive;
+
 
     // Constructor
 
 
-    public User(int id, String email, String displayName, String avatar, String phoneNumber, String role, String password, int walletBalance, boolean isActive) {
+    public User(int id, String email, String displayName, String avatar, String phoneNumber, String role, String password, int pin, int walletBalance, boolean isActive) {
         this.id = id;
         this.email = email;
         this.displayName = displayName;
@@ -22,8 +24,21 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.role = role;
         this.password = password;
+        this.pin = pin;
         this.walletBalance = walletBalance;
         this.isActive = isActive;
+    }
+
+    public User() {
+
+    }
+
+    public int getPin() {
+        return pin;
+    }
+
+    public void setPin(int pin) {
+        this.pin = pin;
     }
 
     public String getEmail() {

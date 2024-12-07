@@ -1,9 +1,14 @@
 package com.example.ftopapplication.network;
 
+import com.example.ftopapplication.TokenResponse;
+import com.example.ftopapplication.data.model.Product;
+import com.example.ftopapplication.data.model.Store;
 import com.example.ftopapplication.data.model.Transaction;
 import com.example.ftopapplication.data.model.User;
+import com.example.ftopapplication.data.model.Voucher;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -33,9 +38,7 @@ public interface ApiService {
     @POST("/transactions")
     Call<Void> createTransaction(@Body Transaction transaction);
 
-    // Endpoint lấy danh sách giao dịch của một người dùng
-    @GET("/transactions/user/{userId}")
-    Call<List<Transaction>> getTransactionsByUserId(@Path("userId") int userId);
+
 
     // Endpoint lấy chi tiết giao dịch
     @GET("/transactions/{transactionId}")
@@ -47,4 +50,31 @@ public interface ApiService {
     // API chuyển tiền
     @POST("api/transaction/transfer")
     Call<Transaction> transferMoney(@Body Transaction transaction);
+
+    @GET("/api/transaction/all-transactions/{userId}")
+    Call<List<Transaction>> getAllTransactionsForUser(@Path("userId") int userId);
+
+    @POST("/api/user/loginUser")
+    Call<User> loginUser(@Body User user);
+
+    @POST("/api/user/loginUser")
+    Call<TokenResponse> loginUser(@Body Map<String, String> loginRequest);
+
+    @GET("/api/voucher")
+    Call<List<Voucher>> getVouchers();
+
+    @GET("/api/store")
+    Call<List<Store>> getStores();
+
+    @GET("/api/store/{id}")
+    Call<Store> getStoreById(@Path("id") int storeId);
+
+    // API lấy danh sách voucher theo storeId
+    @GET("/api/voucher/store/{storeId}")
+    Call<List<Voucher>> getVouchersByStoreId(@Path("storeId") int storeId);
+
+    // API lấy danh sách product theo storeId
+    @GET("/api/product/store/{storeId}")
+    Call<List<Product>> getProductsByStoreId(@Path("storeId") int storeId);
+
 }

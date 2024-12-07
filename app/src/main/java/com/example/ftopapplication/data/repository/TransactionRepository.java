@@ -8,6 +8,7 @@ import com.example.ftopapplication.network.ApiService;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.Retrofit;
 
 public class TransactionRepository {
     private ApiService apiService;
@@ -21,14 +22,14 @@ public class TransactionRepository {
         return apiService.createTransaction(transaction);
     }
 
-    // Lấy danh sách giao dịch theo user ID
-    public Call<List<Transaction>> getTransactionsByTransferUserId(int userId) {
-        return apiService.getTransactionsByTransferUserId(userId);
-    }
-
     // Thực hiện chuyển tiền
     public Call<Transaction> transferMoney(Transaction transaction) {
         return apiService.transferMoney(transaction);
     }
+
+    public Call<List<Transaction>> getAllTransactionsForUser(int userId) {
+        return apiService.getAllTransactionsForUser(userId);
+    }
+
 
 }

@@ -36,7 +36,7 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
     private float amount; // Transfer amount
     private String receiverName;
     private String receiverPhone;
-    private int transferUserId = 1; // Default sender ID
+    private int transferUserId = 4; // Default sender ID
     private int receiverUserId; // Receiver ID
 
     private TransactionRepository transactionRepository;

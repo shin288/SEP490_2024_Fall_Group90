@@ -136,11 +136,13 @@
         <!-- Continue Button -->
         <Button
             android:id="@+id/btn_continue"
-            style="@style/Widget.MaterialComponents.Button"
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:background="@drawable/button_continue_background"
+            android:backgroundTint="@null"
+            android:theme="@null"
             android:text="Continue"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
