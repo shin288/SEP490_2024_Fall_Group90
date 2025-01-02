@@ -36,7 +36,7 @@ public class SelectContactActivity extends AppCompatActivity {
 
     private String selectedContactName = ""; // Recipient's name
     private String selectedContactPhone = ""; // Recipient's phone number
-    private int transferUserId = 4; // Default sender ID
+    private int transferUserId = 16; // Default sender ID
     private int selectedContactId = -1; // Recipient's ID
     private float transferUserBalance = 0.0f; // Sender's balance
     private float amount = 0.0f; // Transaction amount

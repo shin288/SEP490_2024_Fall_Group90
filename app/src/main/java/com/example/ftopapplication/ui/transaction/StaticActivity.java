@@ -49,7 +49,7 @@ public class StaticActivity extends AppCompatActivity {
         transactionRepository = new TransactionRepository();
 
         // Fetch all transactions for the user
-        int userId = 1; // Replace with actual user ID
+        int userId = 19; // Replace with actual user ID
         fetchAllTransactionsForUser(userId);
 
         // Handle "See All Transactions" button

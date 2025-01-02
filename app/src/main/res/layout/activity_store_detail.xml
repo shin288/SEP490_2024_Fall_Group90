@@ -9,20 +9,21 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-        <!-- CollapsingToolbarLayout -->
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsingToolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="300dp"
             app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:expandedTitleMarginStart="16dp"
-            app:expandedTitleMarginEnd="16dp">
+            app:expandedTitleMarginEnd="16dp"
+            app:titleEnabled="true">
 
-            <!-- Header Image -->
+            <!-- Hình ảnh header -->
             <ImageView
                 android:id="@+id/iv_header_image"
                 android:layout_width="match_parent"
@@ -40,11 +41,15 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Nội dung cuộn -->
+    <!-- Nội dung chính -->
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp"
+        android:fillViewport="true">
 
         <!-- Nội dung bên trong -->
         <LinearLayout
@@ -90,59 +95,43 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Sheet -->
-    <LinearLayout
+    <!-- Bottom Sheet cố định -->
+    <FrameLayout
         android:id="@+id/bottom_sheet_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/light_blue"
-        android:elevation="8dp"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        android:layout_gravity="bottom"
+        android:background="@android:color/white"
+        android:elevation="8dp">
 
-        <!-- Drag Indicator -->
-        <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
-            android:background="@color/darker_gray"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Tổng giá tiền -->
+        <!-- Nội dung BottomSheet -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Tổng giá tiền -->
             <TextView
                 android:id="@+id/tv_summary_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Total Price: 30,250 VND"
+                android:text="Total Price: 0 đ"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black" />
+
+            <!-- Nút thanh toán -->
+            <Button
+                android:id="@+id/btn_checkout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Check out"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/green"
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
-        <!-- Nút thanh toán -->
-        <Button
-            android:id="@+id/btn_checkout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Check out"
-            android:layout_margin="16dp"
-            android:backgroundTint="@color/green"
-            android:textColor="@android:color/white"
-            android:elevation="4dp" />
-    </LinearLayout>
+    </FrameLayout>
 
-    <!-- ProgressBar -->
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -39,7 +39,7 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
         holder.voucherTitle.setText(voucher.getVoucherName() != null ? voucher.getVoucherName() : "No Title");
 
         // Kiểm tra và gán giá trị giảm giá
-        if (voucher.getVoucherDiscount() > 0) {
+        if (voucher.getVoucherDiscount() > 0 ) {
             holder.voucherDiscount.setText("Discount: " + voucher.getVoucherDiscount() + "%");
         } else {
             holder.voucherDiscount.setText("No Discount Info");

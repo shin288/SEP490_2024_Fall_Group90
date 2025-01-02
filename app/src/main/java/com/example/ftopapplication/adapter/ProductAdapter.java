@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.ftopapplication.R;
 import com.example.ftopapplication.data.model.Product;
+import com.example.ftopapplication.data.model.ProductOrder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +40,30 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         productQuantities.clear(); // Xóa số lượng sản phẩm trong giỏ hàng
         notifyDataSetChanged(); // Cập nhật RecyclerView
     }
+    public int getTotalPrice() {
+        int totalPrice = 0;
+        for (Product product : productList) {
+            int quantity = productQuantities.getOrDefault(product.getProductId(), 0);
+            totalPrice += quantity * product.getProductPrice();
+        }
+        return totalPrice;
+    }
+
+    public List<ProductOrder> getSelectedProducts() {
+        List<ProductOrder> selectedProducts = new ArrayList<>();
+        for (Product product : productList) {
+            int quantity = productQuantities.getOrDefault(product.getProductId(), 0);
+            if (quantity > 0) {
+                selectedProducts.add(new ProductOrder(
+                        product.getProductId(),
+                        quantity,
+                        product.getProductPrice()
+                ));
+            }
+        }
+        return selectedProducts;
+    }
+
 
     @NonNull
     @Override
@@ -52,10 +77,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         Product product = productList.get(position);
 
         holder.tvProductName.setText(product.getProductName());
-        holder.tvProductPrice.setText(String.format(Locale.getDefault(), "%.0fđ", product.getProductPrice()));
+        holder.tvProductPrice.setText(String.format(Locale.getDefault(), "%d đ", product.getProductPrice()));
 
+        String fullImageUrl = "http://172.20.80.1:8000" + product.getProductImage();
         Glide.with(holder.itemView.getContext())
-                .load(product.getProductImage())
+                .load(fullImageUrl)
                 .placeholder(R.drawable.placeholder_image)
                 .into(holder.ivProductImage);
 

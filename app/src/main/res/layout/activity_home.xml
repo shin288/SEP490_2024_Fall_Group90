@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeActivity">
+    tools:context=".ui.home.HomeActivity">
 
     <!-- Top Section -->
     <RelativeLayout
@@ -16,38 +16,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Your Balance Text -->
+        <!-- Display Name -->
         <TextView
-            android:id="@+id/tv_balance_label"
+            android:id="@+id/tv_display_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your Balance"
-            android:textSize="16sp"
+            android:text="User Name"
+            android:textSize="18sp"
+            android:textStyle="bold"
             android:textColor="@android:color/white"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="16dp" />
+
+        <!-- Balance Value -->
+        <TextView
+            android:id="@+id/tv_balance_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 đ"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:layout_below="@id/tv_display_name"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp" />
 
         <!-- Eye Icon -->
         <ImageView
             android:id="@+id/iv_eye_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="260dp"
+            android:layout_below="@id/tv_display_name"
+            android:layout_toEndOf="@id/tv_balance_value"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:src="@drawable/ic_eye" />
-
-        <!-- Notification Icon -->
-        <ImageView
-            android:id="@+id/iv_notification_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_below="@id/iv_eye_icon"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="-26dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/ic_notification" />
     </RelativeLayout>
 
     <!-- Loading Indicator -->
@@ -106,6 +109,7 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/btn_top_up"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:padding="8dp"
@@ -129,6 +133,7 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/btn_send"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:padding="8dp"
@@ -161,7 +166,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Request"
+                    android:text="Widthdraw"
                     android:textColor="@android:color/black"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -197,7 +202,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:nestedScrollingEnabled="false" />
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"/>
+
+            <TextView
+                android:id="@+id/tv_no_voucher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No data available"
+                android:textSize="16sp"
+                android:textColor="@android:color/darker_gray"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
 
             <!-- Store Section -->
             <TextView
@@ -207,7 +224,8 @@
                 android:text="Store"
                 android:textSize="16sp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="8dp"
+                android:overScrollMode="never"/>
 
             <!-- Store RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
@@ -216,8 +234,22 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:nestedScrollingEnabled="false" />
+
+            <TextView
+                android:id="@+id/tv_no_store"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No stores available"
+                android:textSize="16sp"
+                android:textColor="@android:color/darker_gray"
+                android:gravity="center"
+                android:visibility="gone" />
         </LinearLayout>
+
+
     </androidx.core.widget.NestedScrollView>
+
+
 
     <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

@@ -36,7 +36,7 @@
             android:name=".SignUpActivity"
             android:exported="true"></activity>
         <activity
-            android:name=".SignInActivity"
+            android:name=".ui.signin.SignInActivity"
             android:exported="true"></activity>
         <activity
             android:name=".ui.pinentry.ConfirmPinActivity"

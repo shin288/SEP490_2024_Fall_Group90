@@ -36,7 +36,7 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
     private float amount; // Transfer amount
     private String receiverName;
     private String receiverPhone;
-    private int transferUserId = 4; // Default sender ID
+    private int transferUserId = 19; // Default sender ID
     private int receiverUserId; // Receiver ID
 
     private TransactionRepository transactionRepository;
@@ -186,7 +186,7 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
 
     private void navigateToSuccessScreen() {
         Intent intent = new Intent(this, SendSuccessActivity.class);
-        intent.putExtra("amount", String.format("%.2f đ", amount));
+        intent.putExtra("amount", String.format("%d đ", amount));
         intent.putExtra("name", receiverName);
         intent.putExtra("phone", receiverPhone);
         intent.putExtra("time", "3:02 PM"); // Replace with real-time data

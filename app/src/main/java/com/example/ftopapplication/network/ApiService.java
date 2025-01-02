@@ -1,6 +1,9 @@
 package com.example.ftopapplication.network;
 
 import com.example.ftopapplication.TokenResponse;
+import com.example.ftopapplication.data.model.ApiResponse;
+import com.example.ftopapplication.data.model.OrderTransactionRequest;
+import com.example.ftopapplication.data.model.OrderTransactionResponse;
 import com.example.ftopapplication.data.model.Product;
 import com.example.ftopapplication.data.model.Store;
 import com.example.ftopapplication.data.model.Transaction;
@@ -12,6 +15,8 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -38,14 +43,9 @@ public interface ApiService {
     @POST("/transactions")
     Call<Void> createTransaction(@Body Transaction transaction);
 
-
-
     // Endpoint lấy chi tiết giao dịch
     @GET("/transactions/{transactionId}")
     Call<Transaction> getTransactionById(@Path("transactionId") int transactionId);
-
-    @GET("transactions/transfer-user/{userId}")
-    Call<List<Transaction>> getTransactionsByTransferUserId(@Path("userId") int userId);
 
     // API chuyển tiền
     @POST("api/transaction/transfer")
@@ -53,12 +53,6 @@ public interface ApiService {
 
     @GET("/api/transaction/all-transactions/{userId}")
     Call<List<Transaction>> getAllTransactionsForUser(@Path("userId") int userId);
-
-    @POST("/api/user/loginUser")
-    Call<User> loginUser(@Body User user);
-
-    @POST("/api/user/loginUser")
-    Call<TokenResponse> loginUser(@Body Map<String, String> loginRequest);
 
     @GET("/api/voucher")
     Call<List<Voucher>> getVouchers();
@@ -76,5 +70,16 @@ public interface ApiService {
     // API lấy danh sách product theo storeId
     @GET("/api/product/store/{storeId}")
     Call<List<Product>> getProductsByStoreId(@Path("storeId") int storeId);
+
+    @POST("/api/user/loginUser")
+    @FormUrlEncoded
+    Call<TokenResponse> loginUser(
+            @Field("email") String email,
+            @Field("password") String password
+    );
+
+    @POST("place-order-transaction")
+    Call<ApiResponse<OrderTransactionResponse>> placeOrderWithTransaction(@Body OrderTransactionRequest request);
+
 
 }

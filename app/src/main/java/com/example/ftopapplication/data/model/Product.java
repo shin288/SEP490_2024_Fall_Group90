@@ -1,16 +1,19 @@
 package com.example.ftopapplication.data.model;
 
-public class Product {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Product implements Parcelable {
     private int productId;
     private String productName;
-    private float productPrice;
+    private int productPrice;
     private int categoryId;
     private boolean status;
     private String productImage;
     private int storeId;
 
     // Constructor
-    public Product(int productId, String productName, float productPrice, int categoryId, boolean status, String productImage, int storeId) {
+    public Product(int productId, String productName, int productPrice, int categoryId, boolean status, String productImage, int storeId) {
         this.productId = productId;
         this.productName = productName;
         this.productPrice = productPrice;
@@ -18,6 +21,45 @@ public class Product {
         this.status = status;
         this.productImage = productImage;
         this.storeId = storeId;
+    }
+
+    // Parcelable implementation
+    protected Product(Parcel in) {
+        productId = in.readInt();
+        productName = in.readString();
+        productPrice = in.readInt();
+        categoryId = in.readInt();
+        status = in.readByte() != 0;
+        productImage = in.readString();
+        storeId = in.readInt();
+    }
+
+    public static final Creator<Product> CREATOR = new Creator<Product>() {
+        @Override
+        public Product createFromParcel(Parcel in) {
+            return new Product(in);
+        }
+
+        @Override
+        public Product[] newArray(int size) {
+            return new Product[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(productId);
+        dest.writeString(productName);
+        dest.writeInt(productPrice);
+        dest.writeInt(categoryId);
+        dest.writeByte((byte) (status ? 1 : 0));
+        dest.writeString(productImage);
+        dest.writeInt(storeId);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     // Getters và Setters
@@ -37,11 +79,11 @@ public class Product {
         this.productName = productName;
     }
 
-    public float getProductPrice() {
+    public int getProductPrice() {
         return productPrice;
     }
 
-    public void setProductPrice(float productPrice) {
+    public void setProductPrice(int productPrice) {
         this.productPrice = productPrice;
     }
 

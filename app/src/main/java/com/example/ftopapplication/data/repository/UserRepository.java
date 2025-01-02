@@ -1,5 +1,6 @@
 package com.example.ftopapplication.data.repository;
 
+import com.example.ftopapplication.TokenResponse;
 import com.example.ftopapplication.data.model.User;
 import com.example.ftopapplication.network.ApiClient;
 import com.example.ftopapplication.network.ApiService;
@@ -36,7 +37,7 @@ public class UserRepository {
         return apiService.searchUserByPhoneNumber(phoneNumber);
     }
 
-    public Call<User> loginUser(User user){
-        return apiService.loginUser(user);
+    public Call<TokenResponse> loginUser(String email, String password) {
+        return apiService.loginUser(email, password);
     }
 }

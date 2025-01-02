@@ -50,12 +50,35 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.StoreViewHol
         // Tối ưu hóa load ảnh
         List<String> images = store.getStoreImage();
         if (images != null && !images.isEmpty()) {
+            // Large Image
             Glide.with(holder.itemView.getContext())
                     .load(images.get(0))
                     .placeholder(R.drawable.placeholder_image)
                     .into(holder.largeImage);
+
+            // Small Image 1
+            if (images.size() > 1) {
+                Glide.with(holder.itemView.getContext())
+                        .load(images.get(1))
+                        .placeholder(R.drawable.placeholder_image)
+                        .into(holder.smallImage1);
+            } else {
+                holder.smallImage1.setImageResource(R.drawable.placeholder_image);
+            }
+
+            // Small Image 2
+            if (images.size() > 2) {
+                Glide.with(holder.itemView.getContext())
+                        .load(images.get(2))
+                        .placeholder(R.drawable.placeholder_image)
+                        .into(holder.smallImage2);
+            } else {
+                holder.smallImage2.setImageResource(R.drawable.placeholder_image);
+            }
         } else {
             holder.largeImage.setImageResource(R.drawable.placeholder_image);
+            holder.smallImage1.setImageResource(R.drawable.placeholder_image);
+            holder.smallImage2.setImageResource(R.drawable.placeholder_image);
         }
 
         // Click listener
@@ -81,15 +104,19 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.StoreViewHol
     static class StoreViewHolder extends RecyclerView.ViewHolder {
         final TextView storeName;
         final TextView storeAddress;
-        final ImageView largeImage;
+        final ImageView largeImage, smallImage1, smallImage2;
 
         public StoreViewHolder(@NonNull View itemView) {
             super(itemView);
             storeName = itemView.findViewById(R.id.tv_store_name);
             storeAddress = itemView.findViewById(R.id.tv_store_address);
             largeImage = itemView.findViewById(R.id.iv_store_large_image);
+
+            smallImage1 = itemView.findViewById(R.id.iv_store_small_image_1);
+            smallImage2 = itemView.findViewById(R.id.iv_store_small_image_2);
         }
     }
+
 
     private static class StoreDiffCallback extends DiffUtil.Callback {
 

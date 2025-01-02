@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Bo góc -->
+    <corners android:radius="16dp" />
 
-</selector>
+    <!-- Màu nền -->
+    <solid android:color="@color/blue_background" />
+
+    <!-- Đường viền (nếu cần) -->
+    <stroke
+        android:width="2dp"
+        android:color="@android:color/white" />
+</shape>
