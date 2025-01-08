@@ -11,14 +11,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ftopapplication.R;
 import com.example.ftopapplication.data.model.Transaction;
 import com.example.ftopapplication.data.repository.TransactionRepository;
+import com.example.ftopapplication.ui.home.HomeActivity;
+import com.example.ftopapplication.viewmodel.transaction.StaticViewModel;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,53 +33,132 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import www.sanju.motiontoast.MotionToast;
+import www.sanju.motiontoast.MotionToastStyle;
 
 public class StaticActivity extends AppCompatActivity {
 
+    private TextView currentBalanceTextView, incomeTextView, expenseTextView;
     private LinearLayout transactionHistoryContainer;
     private BarChart moneyTrackerChart;
     private Button seeAllTransactionButton;
-    private TransactionRepository transactionRepository;
+    private StaticViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_static);
 
+        incomeTextView = findViewById(R.id.income_text);
+        expenseTextView = findViewById(R.id.expense_text);
+        currentBalanceTextView = findViewById(R.id.current_balance);
+
+        int userId = getIntent().getIntExtra("user_id", -1);
         // Initialize components
         moneyTrackerChart = findViewById(R.id.money_tracker_chart);
         transactionHistoryContainer = findViewById(R.id.transaction_history_container);
         seeAllTransactionButton = findViewById(R.id.btn_see_all_transactions);
 
-        transactionRepository = new TransactionRepository();
+        viewModel = new ViewModelProvider(this).get(StaticViewModel.class);
+        viewModel.fetchUserWalletBalance(userId);
+        setupObservers();
 
         // Fetch all transactions for the user
-        int userId = 19; // Replace with actual user ID
-        fetchAllTransactionsForUser(userId);
+        if (userId != -1) {
+            viewModel.fetchTransactionSummary(userId);
+        } else {
+            showMotionToast("Error", "User ID not found!", MotionToastStyle.ERROR);
+        }
 
         // Handle "See All Transactions" button
-        seeAllTransactionButton.setOnClickListener(v -> openTransactionHistory());
+        seeAllTransactionButton.setOnClickListener(v -> openTransactionHistory(userId));
+        setupBottomNavigation(userId);
+
     }
 
-    private void fetchAllTransactionsForUser(int userId) {
-        transactionRepository.getAllTransactionsForUser(userId).enqueue(new Callback<List<Transaction>>() {
-            @Override
-            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Transaction> transactions = response.body();
-                    updateTransactionList(transactions);
-                    updateMoneyTrackerChart(transactions);
-                } else {
-                    Toast.makeText(StaticActivity.this, "Failed to load transactions", Toast.LENGTH_SHORT).show();
-                }
-            }
+    private void setupObservers() {
+        // Observe current balance
+        viewModel.getBalanceLiveData().observe(this, balance -> {
+            currentBalanceTextView.setText(String.format("$%,d", balance));
+        });
 
-            @Override
-            public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                Toast.makeText(StaticActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+        // Observe income
+        viewModel.getIncomeLiveData().observe(this, income -> {
+            incomeTextView.setText(String.format("$%,d", income));
+        });
+
+        // Observe expense
+        viewModel.getExpenseLiveData().observe(this, expense -> {
+            expenseTextView.setText(String.format("$%,d", expense));
+        });
+
+        // Observe transaction list
+        viewModel.getTransactionsLiveData().observe(this, transactions -> {
+            if (transactions == null || transactions.isEmpty()) {
+                showMotionToast("Info", "No transactions available!", MotionToastStyle.INFO);
+            } else {
+                updateTransactionList(transactions);
+                updateMoneyTrackerChart(transactions);
+            }
+        });
+
+        // Observe error messages
+        viewModel.getErrorLiveData().observe(this, errorMessage -> {
+            if (errorMessage != null) {
+                showMotionToast("Error", errorMessage, MotionToastStyle.ERROR);
             }
         });
     }
+
+    private void showMotionToast(String title, String message, MotionToastStyle style) {
+        MotionToast.Companion.darkColorToast(this,
+                title,
+                message,
+                style,
+                MotionToast.GRAVITY_BOTTOM,
+                MotionToast.LONG_DURATION,
+                ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
+    }
+
+    private void setupBottomNavigation(int userId) {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_home) {
+                // Điều hướng đến HomeActivity
+                Intent homeIntent = new Intent(StaticActivity.this, HomeActivity.class);
+                homeIntent.putExtra("user_id", userId);
+                startActivity(homeIntent);
+                finish(); // Kết thúc StaticActivity
+                return true;
+
+            } else if (itemId == R.id.menu_cashflow) {
+                // Đã ở StaticActivity, không cần làm gì
+                return true;
+
+            } else if (itemId == R.id.menu_pay) {
+                // Hiển thị thông báo cho mục Pay (hoặc điều hướng nếu có màn hình riêng)
+                Toast.makeText(this, "Pay clicked", Toast.LENGTH_SHORT).show();
+                return true;
+
+            } else if (itemId == R.id.menu_message) {
+                // Hiển thị thông báo cho mục Message
+                Toast.makeText(this, "Message clicked", Toast.LENGTH_SHORT).show();
+                return true;
+
+            } else if (itemId == R.id.menu_profile) {
+                // Hiển thị thông báo cho mục Profile
+                Toast.makeText(this, "Profile clicked", Toast.LENGTH_SHORT).show();
+                return true;
+
+            } else {
+                return false;
+            }
+        });
+    }
+
 
     private void updateTransactionList(List<Transaction> transactions) {
         transactionHistoryContainer.removeAllViews(); // Clear previous items
@@ -105,9 +189,9 @@ public class StaticActivity extends AppCompatActivity {
 
         for (Transaction transaction : transactions) {
             int dayOfWeek = getDayOfWeek(transaction.getTransactionDate()); // Convert date to day of week
-            if (transaction.isStatus()) {
+            if (transaction.getReceiveUserId() == getIntent().getIntExtra("user_id", -1)) {
                 dailyIncome[dayOfWeek] += transaction.getTransactionAmount();
-            } else {
+            } else if (transaction.getTransferUserId() == getIntent().getIntExtra("user_id", -1)) {
                 dailyExpense[dayOfWeek] += transaction.getTransactionAmount();
             }
         }
@@ -132,11 +216,6 @@ public class StaticActivity extends AppCompatActivity {
         moneyTrackerChart.invalidate();
     }
 
-    private int getDayOfWeek(String date) {
-        // Replace with actual implementation to parse date
-        return 0; // Mocked as Sunday
-    }
-
     private void addTransactionItem(String title, String date, String amount, int iconRes, String color) {
         View transactionItemView = LayoutInflater.from(this).inflate(R.layout.transaction_item, transactionHistoryContainer, false);
 
@@ -154,8 +233,9 @@ public class StaticActivity extends AppCompatActivity {
         transactionHistoryContainer.addView(transactionItemView);
     }
 
-    private void openTransactionHistory() {
+    private void openTransactionHistory(int userId) {
         Intent intent = new Intent(StaticActivity.this, TransactionHistoryActivity.class);
+        intent.putExtra("user_id", userId); // Truyền userId
         startActivity(intent); // Chuyển sang màn TransactionHistoryActivity
     }
 }

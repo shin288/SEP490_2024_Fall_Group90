@@ -89,8 +89,9 @@
             android:layout_width="match_parent"
             android:layout_height="57dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="135dp"
             android:layout_marginEnd="16dp"
+
             android:background="@drawable/edittext_background"
             android:ems="10"
             android:hint=" Email/Phone Number"
@@ -109,7 +110,7 @@
             android:layout_height="57dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="29dp"
+            android:layout_marginBottom="45dp"
             android:background="@drawable/edittext_background"
             android:ems="10"
             android:hint=" Password"
@@ -162,12 +163,12 @@
             android:text="Don't have account yet?"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textView5"
+            app:layout_constraintEnd_toStartOf="@+id/tv_sign_up"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/tv_sign_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="13dp"

@@ -2,28 +2,38 @@ package com.example.ftopapplication.ui.send;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.example.ftopapplication.ui.shared.fragment.NumberPadFragment;
 import com.example.ftopapplication.R;
+import com.example.ftopapplication.ui.shared.fragment.NumberPadFragment;
+import com.example.ftopapplication.viewmodel.send.SendViewModel;
 
 public class SendActivity extends AppCompatActivity implements NumberPadFragment.OnNumberPadClickListener {
 
     private TextView tvAmount;
     private Button btnContinue;
-    private StringBuilder inputAmount = new StringBuilder("0");
+    private SendViewModel sendViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send);
 
+        // Initialize ViewModel
+        sendViewModel = new ViewModelProvider(this).get(SendViewModel.class);
+
         tvAmount = findViewById(R.id.tv_amount);
         btnContinue = findViewById(R.id.btn_continue);
+
+        // Observe LiveData
+        sendViewModel.getAmount().observe(this, amount -> {
+            updateAmountDisplay(amount);
+            btnContinue.setEnabled(amount > 0 && amount <= 1_000_000_000);
+        });
 
         // Initialize NumberPadFragment
         NumberPadFragment numberPadFragment = new NumberPadFragment();
@@ -32,70 +42,32 @@ public class SendActivity extends AppCompatActivity implements NumberPadFragment
         transaction.commit();
 
         // Setup Preset Amount Buttons
-        findViewById(R.id.btn_100).setOnClickListener(v -> updateAmount(100f));
-        findViewById(R.id.btn_500).setOnClickListener(v -> updateAmount(500f));
-        findViewById(R.id.btn_1000).setOnClickListener(v -> updateAmount(1000f));
-        findViewById(R.id.btn_1500).setOnClickListener(v -> updateAmount(1500f));
+        findViewById(R.id.btn_1000).setOnClickListener(v -> sendViewModel.setAmount(1000));
+        findViewById(R.id.btn_5000).setOnClickListener(v -> sendViewModel.setAmount(5000));
+        findViewById(R.id.btn_10000).setOnClickListener(v -> sendViewModel.setAmount(10000));
+        findViewById(R.id.btn_20000).setOnClickListener(v -> sendViewModel.setAmount(20000));
+        findViewById(R.id.btn_50000).setOnClickListener(v -> sendViewModel.setAmount(50000));
 
         // Handle Continue Button
         btnContinue.setOnClickListener(v -> {
-            if (btnContinue.isEnabled()) {
-                navigateToSelectContact();
-            }
+            Intent intent = new Intent(this, SelectContactActivity.class);
+            intent.putExtra("amount", sendViewModel.getAmount().getValue());
+            intent.putExtra("userId", sendViewModel.getUserId().getValue());
+            startActivity(intent);
         });
-
-        // Initial state
-        updateAmountDisplay();
     }
 
-    private void updateAmount(float amount) {
-        inputAmount = new StringBuilder(String.valueOf((int) amount)); // Chuyển đổi float thành String không có phần thập phân
-        updateAmountDisplay();
+    private void updateAmountDisplay(int amount) {
+        tvAmount.setText(String.format("%,d đ", amount));
     }
 
     @Override
     public void onNumberClick(String number) {
-        if (inputAmount.toString().equals("0")) {
-            inputAmount = new StringBuilder(number);
-        } else if (inputAmount.length() < 9) { // Giới hạn 9 chữ số
-            inputAmount.append(number);
-        }
-        updateAmountDisplay();
+        sendViewModel.appendAmount(number);
     }
 
     @Override
     public void onBackspaceClick() {
-        if (inputAmount.length() > 1) {
-            inputAmount.deleteCharAt(inputAmount.length() - 1);
-        } else {
-            inputAmount = new StringBuilder("0");
-        }
-        updateAmountDisplay();
-    }
-
-    private void updateAmountDisplay() {
-        String amountString = inputAmount.toString().replaceAll("[^0-9]", "");
-
-        if (amountString.isEmpty()) {
-            amountString = "0";
-        }
-
-        // Chuyển đổi số tiền từ String sang float
-        float amount = Float.parseFloat(amountString);
-
-        // Hiển thị số tiền với định dạng
-        tvAmount.setText(String.format("%.0f đ", amount));
-
-        // Kiểm tra số tiền hợp lệ
-        boolean isAmountValid = amount > 0 && amount <= 1_000_000_000; // Giới hạn tối đa 1 tỷ
-        btnContinue.setEnabled(isAmountValid);
-    }
-
-    private void navigateToSelectContact() {
-        Intent intent = new Intent(this, SelectContactActivity.class);
-
-        // Truyền số tiền dưới dạng float
-        intent.putExtra("amount", Float.parseFloat(inputAmount.toString().replaceAll("[^0-9]", "")));
-        startActivity(intent);
+        sendViewModel.removeLastDigit();
     }
 }

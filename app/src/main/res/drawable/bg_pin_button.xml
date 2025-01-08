@@ -3,8 +3,8 @@
     <!-- Trạng thái khi nhấn -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/blue_pressed" /> <!-- Màu nền khi nhấn -->
-            <corners android:radius="16dp" /> <!-- Bo góc -->
+            <solid android:color="@color/white" /> <!-- Màu trắng khi nhấn -->
+            <corners android:radius="16dp" />
             <stroke
                 android:width="2dp"
                 android:color="@color/white" /> <!-- Viền xanh -->
@@ -14,11 +14,12 @@
     <!-- Trạng thái mặc định -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/white" /> <!-- Màu nền mặc định -->
-            <corners android:radius="16dp" /> <!-- Bo góc -->
+            <solid android:color="@color/blue_background" /> <!-- Màu xanh nền -->
+            <corners android:radius="16dp" />
             <stroke
                 android:width="2dp"
-                android:color="@color/white" /> <!-- Viền xanh -->
+                android:color="@color/white" /> <!-- Viền trắng -->
         </shape>
     </item>
 </selector>
+

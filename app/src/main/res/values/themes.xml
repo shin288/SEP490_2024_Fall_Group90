@@ -1,11 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.FTOPApplication" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-        <item name="buttonStyle">@null</item>
+        <!-- Màu chính -->
+        <item name="colorPrimary">@color/blue_background</item>
+        <item name="colorPrimaryVariant">@color/blue_pressed</item>
+        <item name="colorOnPrimary">@color/white</item>
 
+        <!-- Màu phụ -->
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorOnSecondary">@color/blue_background</item>
 
+        <!-- Nền mặc định -->
+        <item name="android:windowBackground">@color/white</item>
+
+        <!-- Loại bỏ backgroundTint mặc định -->
+        <item name="colorButtonNormal">@null</item>
+        <item name="android:colorButtonNormal">@null</item>
+        <item name="materialButtonStyle">@null</item> <!-- Đảm bảo nút sử dụng style của bạn -->
 
     </style>
 

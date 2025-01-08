@@ -2,6 +2,7 @@ package com.example.ftopapplication.ui.pinentry;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,13 +12,18 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ftopapplication.R;
+import com.example.ftopapplication.data.model.OrderTransactionRequest;
 import com.example.ftopapplication.data.model.Transaction;
 import com.example.ftopapplication.data.repository.TransactionRepository;
 import com.example.ftopapplication.ui.send.SendActivity;
 import com.example.ftopapplication.ui.send.SendSuccessActivity;
 import com.example.ftopapplication.ui.shared.fragment.PinNumberPadFragment;
+import com.example.ftopapplication.viewmodel.pinentry.PinEntryViewModel;
+import com.example.ftopapplication.viewmodel.pinentry.PinEntryViewModelFactory;
+
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,18 +39,23 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
     private TextView pinErrorMessage;
     private ImageView btnBack;
 
-    private float amount; // Transfer amount
+    private int amount; // Transfer amount
     private String receiverName;
     private String receiverPhone;
-    private int transferUserId = 19; // Default sender ID
+    private int transferUserId ; // Default sender ID
     private int receiverUserId; // Receiver ID
 
     private TransactionRepository transactionRepository;
+    private OrderTransactionRequest orderRequest;
+    private PinEntryViewModel viewModel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pin_entry);
+
+        initViewModel();
 
         // Initialize views
         pinDisplay = findViewById(R.id.pin_display);
@@ -55,16 +66,21 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
 
         // Retrieve data from Intent
         Intent intent = getIntent();
-        amount = intent.getFloatExtra("amount", 0.0f);
+        amount = intent.getIntExtra("amount", 0);
         receiverName = intent.getStringExtra("receiver_name");
         receiverPhone = intent.getStringExtra("receiver_phone");
-        receiverUserId = intent.getIntExtra("receiver_user_id", -1);
+        receiverUserId = intent.getIntExtra("receiver_id", -1);
 
-        Log.d("PinEntryActivity", "Amount: " + amount);
-        Log.d("PinEntryActivity", "Receiver Name: " + receiverName);
-        Log.d("PinEntryActivity", "Receiver Phone: " + receiverPhone);
-        Log.d("PinEntryActivity", "Receiver User ID: " + receiverUserId);
+        orderRequest = intent.getParcelableExtra("orderRequest");
 
+        if (orderRequest == null) {
+            Log.e("PinEntryActivity", "Intent is null. Cannot proceed.");
+            Toast.makeText(this, "Invalid order data. Please try again.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        Log.d("PinEntryActivity", "OrderTransactionRequest: " + orderRequest.toString());
         // Nếu giá trị receiverUserId vẫn là -1
         if (receiverUserId == -1) {
             Toast.makeText(this, "Invalid receiver . Please try again.", Toast.LENGTH_SHORT).show();
@@ -80,6 +96,57 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
         if (numberPadFragment != null) {
             numberPadFragment.setOnPinClickListener(this); // Attach listener
         }
+    }
+
+    private void initViews() {
+        pinDisplay = findViewById(R.id.pin_display);
+        pinErrorMessage = findViewById(R.id.pin_error_message);
+        btnBack = findViewById(R.id.btn_back);
+
+        PinNumberPadFragment numberPadFragment = (PinNumberPadFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.number_pad_pin_fragment);
+        if (numberPadFragment != null) {
+            numberPadFragment.setOnPinClickListener(this);
+        }
+    }
+
+    private void initViewModel() {
+        TransactionRepository repository = new TransactionRepository(); // Khởi tạo repository
+        PinEntryViewModelFactory factory = new PinEntryViewModelFactory(repository);
+        viewModel = new ViewModelProvider(this, factory).get(PinEntryViewModel.class);
+    }
+
+    private void observeViewModel() {
+        viewModel.getIsLoading().observe(this, this::showLoading);
+
+        // Xử lý phản hồi từ placeOrderWithTransaction
+        viewModel.getOrderResponseLiveData().observe(this, response -> {
+            if (response != null && response.getData() != null) {
+                Log.d("StoreDetailActivity", "Order placed successfully: " + response.getData());
+                navigateToSuccessScreen(response.getData().getOrder().getTotalPrice(), "Order placed successfully!");
+            } else {
+                showErrorMessage("Failed to place order. Please try again.");
+            }
+        });
+
+        // Xử lý phản hồi từ transferMoney
+        viewModel.getTransferResponseLiveData().observe(this, transaction -> {
+            if (transaction != null) {
+                // Chuyển sang màn hình thành công khi chuyển tiền thành công
+                navigateToSuccessScreen(transaction.getTransactionAmount(), "Money transferred successfully!");
+            } else {
+                showErrorMessage("Failed to transfer money. Please try again.");
+            }
+        });
+
+        viewModel.getErrorMessage().observe(this, this::showErrorMessage);
+    }
+
+    private void showErrorMessage(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showLoading(Boolean aBoolean) {
     }
 
     @Override
@@ -120,12 +187,36 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
     }
 
     private void validatePin() {
+        if (viewModel == null) {
+            showErrorMessage("ViewModel not initialized. Cannot process order.");
+            return;
+        }
         if (enteredPin.toString().equals(CORRECT_PIN)) {
-            initiateTransfer();
+            if (orderRequest != null) {
+                viewModel.placeOrder(orderRequest); // Gọi API placeOrderWithTransaction
+
+                // Quan sát kết quả từ ViewModel
+                viewModel.getOrderResponseLiveData().observe(this, response -> {
+                    if (response != null && response.getMessage() != null && response.getMessage().equalsIgnoreCase("Order and transaction processed successfully")) {
+                        Log.d("PinEntryActivity", "Order placed successfully: " + response);
+
+                        // Chuyển sang màn hình thành công
+                        navigateToSuccessScreen(amount, "Order placed successfully!");
+                    } else {
+                        Log.e("PinEntryActivity", "Failed to place order. Response: " + response);
+                        showErrorMessage("Failed to place order. Please try again.");
+                    }
+                });
+
+            } else {
+                showErrorMessage("Order request is null. Cannot process transaction.");
+            }
         } else {
             showPinError();
         }
     }
+
+
 
     private void showPinError() {
         pinErrorMessage.setVisibility(View.VISIBLE);
@@ -135,38 +226,13 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
     }
 
     private void initiateTransfer() {
-        // Tạo đối tượng transaction
         Transaction transaction = new Transaction();
         transaction.setTransferUserId(transferUserId);
         transaction.setReceiveUserId(receiverUserId);
         transaction.setTransactionAmount(amount);
         transaction.setTransactionDescription("Money Transfer");
 
-        Log.d("PinEntryActivity", "Transaction Data: " + transaction.toString());
-
-        // Gọi API transferMoney
-        transactionRepository.transferMoney(transaction).enqueue(new Callback<Transaction>() {
-            @Override
-            public void onResponse(Call<Transaction> call, Response<Transaction> response) {
-                if (response.isSuccessful()) {
-                    navigateToSuccessScreen();
-                } else {
-                    try {
-                        String errorBody = response.errorBody().string();
-                        Log.e("PinEntryActivity", "API Error Response: " + errorBody);
-                    } catch (Exception e) {
-                        Log.e("PinEntryActivity", "Error parsing error response", e);
-                    }
-                    showTransferFailedDialog("Transaction failed. Please try again.");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Transaction> call, Throwable t) {
-                Log.e("PinEntryActivity", "API Failure: " + t.getMessage());
-                showTransferFailedDialog("Network error: " + t.getMessage());
-            }
-        });
+        viewModel.transferMoney(transaction); // Call transferMoney API
     }
 
 
@@ -184,12 +250,14 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
                 .show();
     }
 
-    private void navigateToSuccessScreen() {
+    private void navigateToSuccessScreen(int amount, String message) {
         Intent intent = new Intent(this, SendSuccessActivity.class);
         intent.putExtra("amount", String.format("%d đ", amount));
         intent.putExtra("name", receiverName);
-        intent.putExtra("phone", receiverPhone);
+
         intent.putExtra("time", "3:02 PM"); // Replace with real-time data
+        intent.putExtra("user_id", orderRequest.getUserId());
+        Log.d("pinentry", "user_id: " + orderRequest.getUserId());
         startActivity(intent);
         finish();
     }

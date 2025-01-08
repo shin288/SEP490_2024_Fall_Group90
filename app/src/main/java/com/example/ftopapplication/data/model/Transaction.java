@@ -6,12 +6,12 @@ public class Transaction {
     private int transactionId;
     private int transferUserId;  // ID người gửi (sửa từ User senderId)
     private int receiveUserId;   // ID người nhận (sửa từ User receiverId)
-    private float transactionAmount; // Số tiền giao dịch (sửa từ amount)
+    private int transactionAmount; // Số tiền giao dịch (sửa từ amount)
     private String transactionDescription; // Ghi chú giao dịch (sửa từ description)
     private Date transactionDate;  // Ngày giao dịch
     private boolean status;        // Trạng thái giao dịch (thành công/thất bại)
 
-    public Transaction(int transactionId, int transferUserId, int receiveUserId, float transactionAmount, String transactionDescription, Date transactionDate, boolean status) {
+    public Transaction(int transactionId, int transferUserId, int receiveUserId, int transactionAmount, String transactionDescription, Date transactionDate, boolean status) {
         this.transactionId = transactionId;
         this.transferUserId = transferUserId;
         this.receiveUserId = receiveUserId;
@@ -47,11 +47,11 @@ public class Transaction {
         this.receiveUserId = receiveUserId;
     }
 
-    public float getTransactionAmount() {
+    public int getTransactionAmount() {
         return transactionAmount;
     }
 
-    public void setTransactionAmount(float transactionAmount) {
+    public void setTransactionAmount(int transactionAmount) {
         this.transactionAmount = transactionAmount;
     }
 

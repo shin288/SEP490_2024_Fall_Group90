@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -18,6 +19,7 @@ import com.auth0.android.jwt.JWT;
 import com.example.ftopapplication.R;
 import com.example.ftopapplication.ui.home.HomeActivity;
 import com.example.ftopapplication.data.repository.UserRepository;
+import com.example.ftopapplication.ui.signup.SignUpActivity;
 import com.example.ftopapplication.viewmodel.signin.SignInViewModel;
 import com.example.ftopapplication.viewmodel.signin.SignInViewModelFactory;
 
@@ -26,6 +28,7 @@ public class SignInActivity extends AppCompatActivity {
     private EditText edtMail, edtPassword;
     private Button btnSignIn;
     private SignInViewModel signInViewModel;
+    private TextView tvSignUp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,14 @@ public class SignInActivity extends AppCompatActivity {
         edtMail = findViewById(R.id.edtEmail);
         edtPassword = findViewById(R.id.edtPassword);
         btnSignIn = findViewById(R.id.btnSignIn);
+        tvSignUp = findViewById(R.id.tv_sign_up);
+
+        // Chuyển sang màn hình Sign Up
+
+        tvSignUp.setOnClickListener(v -> {
+            Intent intent = new Intent(SignInActivity.this, SignUpActivity.class);
+            startActivity(intent);
+        });
 
         // Thiết lập sự kiện click nút "Sign In"
         btnSignIn.setOnClickListener(v -> {

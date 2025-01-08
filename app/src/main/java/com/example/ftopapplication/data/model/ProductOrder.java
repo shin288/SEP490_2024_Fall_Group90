@@ -67,4 +67,13 @@ public class ProductOrder implements Parcelable {
     public void setPrice(double price) {
         this.price = price;
     }
+
+    @Override
+    public String toString() {
+        return "ProductOrder{" +
+                "productId=" + productId +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                '}';
+    }
 }

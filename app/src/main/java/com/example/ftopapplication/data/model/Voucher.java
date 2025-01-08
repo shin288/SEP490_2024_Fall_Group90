@@ -3,13 +3,13 @@ package com.example.ftopapplication.data.model;
 public class Voucher {
     private int voucherId;           // ID của voucher
     private String voucherName;      // Tên voucher
-    private double voucherDiscount;  // Mức giảm giá
+    private int voucherDiscount;  // Mức giảm giá
     private String expiredDate;      // Ngày hết hạn
     private String createdDate;      // Ngày tạo
     private boolean isDeleted;       // Trạng thái đã xóa
     private Store store;             // Thông tin cửa hàng liên kết
 
-    public Voucher(int voucherId, String voucherName, double voucherDiscount, String expiredDate, String createdDate, boolean isDeleted, Store store) {
+    public Voucher(int voucherId, String voucherName, int voucherDiscount, String expiredDate, String createdDate, boolean isDeleted, Store store) {
         this.voucherId = voucherId;
         this.voucherName = voucherName;
         this.voucherDiscount = voucherDiscount;
@@ -39,11 +39,11 @@ public class Voucher {
         this.voucherName = voucherName;
     }
 
-    public double getVoucherDiscount() {
+    public int getVoucherDiscount() {
         return voucherDiscount;
     }
 
-    public void setVoucherDiscount(double voucherDiscount) {
+    public void setVoucherDiscount(int voucherDiscount) {
         this.voucherDiscount = voucherDiscount;
     }
 

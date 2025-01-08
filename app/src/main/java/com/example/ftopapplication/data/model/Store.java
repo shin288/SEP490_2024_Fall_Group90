@@ -2,22 +2,24 @@ package com.example.ftopapplication.data.model;
 
 import java.util.List;
 
-public class Store {
+public class    Store {
     private int storeId;
     private String storeName;
     private String storeAddress;
     private String storePhone;
     private boolean status;
     private List<String> storeImage;
+    private User user;
 
 
-    public Store(int storeId, String storeAddress, String storeName, String storePhone, boolean status, List<String> storeImage) {
+    public Store(int storeId, String storeAddress, String storeName, String storePhone, boolean status, List<String> storeImage, User user) {
         this.storeId = storeId;
         this.storeAddress = storeAddress;
         this.storeName = storeName;
         this.storePhone = storePhone;
         this.status = status;
         this.storeImage = storeImage;
+        this.user = user;
     }
 
     public Store() {
@@ -71,5 +73,11 @@ public class Store {
         this.status = status;
     }
 
+    public User getUser() {
+        return user;
+    }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

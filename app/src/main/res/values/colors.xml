@@ -6,12 +6,16 @@
     <color name="blue_border">#1E88E5</color> <!-- Màu viền xanh -->
     <color name="blue_pressed">#0D47A1</color>
 
-    <color name="purple" />
-    <color name="red" /> <!-- Màu nền khi nhấn -->
     <color name="blue"/>
     <color name="gray">#808080</color>
     <color name="darker_gray" />
-    <color name="green" />
+    <color name="red">#D32F2F</color> <!-- Màu đỏ cho chi phí -->
+    <color name="green">#388E3C</color> <!-- Màu xanh lá cho thu nhập -->
+    <color name="income_color">#008000</color> <!-- Văn bản thu nhập -->
+    <color name="expense_color">#FF0000</color> <!-- Văn bản chi phí -->
+    <color name="disabled_text_color">#888888</color> <!-- Văn bản nút bị vô hiệu hóa -->
+    <color name="active_text_color">#FFA500</color> <!-- Văn bản nút đang hoạt động -->
 
+    <color name="purple">#673AB7</color> <!-- Màu tím cho các phần nhấn mạnh -->
 
 </resources>

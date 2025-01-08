@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +25,9 @@ import com.example.ftopapplication.ui.topup.TopUpActivity;
 import com.example.ftopapplication.ui.transaction.StaticActivity;
 import com.example.ftopapplication.viewmodel.home.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import www.sanju.motiontoast.MotionToast;
+import www.sanju.motiontoast.MotionToastStyle;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -43,7 +47,6 @@ public class HomeActivity extends AppCompatActivity {
 
         initViews();
         setupRecyclerViews();
-        setupBottomNavigation();
 
         // Khởi tạo ViewModel
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
@@ -65,14 +68,6 @@ public class HomeActivity extends AppCompatActivity {
                 viewModel.resetErrorState();
             }
         });
-
-        viewModel.getUserLiveData().observe(this, user -> {
-            if (user != null) {
-                tvDisplayName.setText(user.getDisplayName());
-                tvBalanceValue.setText(String.format("%d đ", user.getWalletBalance()));
-            }
-        });
-
         // Quan sát danh sách voucher
         viewModel.getVouchersLiveData().observe(this, vouchers -> {
             boolean hasData = vouchers != null && !vouchers.isEmpty();
@@ -118,14 +113,19 @@ public class HomeActivity extends AppCompatActivity {
         if (userId != -1) {
             viewModel.fetchUserInfo(userId);
         } else {
-            Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show();
+            showMotionToast("Error", "User ID not found!", MotionToastStyle.ERROR);
         }
+
+        setupBottomNavigation(userId);
+        viewModel.getUserLiveData().observe(this, user -> {
+            if (user != null) {
+                tvDisplayName.setText(user.getDisplayName());
+                tvBalanceValue.setText(String.format("%d đ", user.getWalletBalance()));
+            }
+        });
 
     }
 
-    /**
-     * Phương thức khởi tạo các view
-     */
     private void initViews() {
 
         rvVouchers = findViewById(R.id.rv_voucher_list);
@@ -141,7 +141,11 @@ public class HomeActivity extends AppCompatActivity {
         ImageView btnTopUp = findViewById(R.id.btn_top_up);
         if (btnTopUp != null) {
             btnTopUp.setOnClickListener(v -> {
+
+
                 Intent intent = new Intent(HomeActivity.this, TopUpActivity.class);
+                int userId = getIntent().getIntExtra("user_id", -1);
+                intent.putExtra("user_id", userId);
                 startActivity(intent);
             });
         } else {
@@ -152,20 +156,32 @@ public class HomeActivity extends AppCompatActivity {
         if (btnSend != null) {
             btnSend.setOnClickListener(v -> {
                 Intent intent = new Intent(HomeActivity.this, SendActivity.class);
+                int userId = getIntent().getIntExtra("user_id", -1);
+                intent.putExtra("user_id", userId);
                 startActivity(intent);
             });
         } else {
             Log.e("HomeActivity", "btn_send not exist in layout");
         }
 
+        ImageView btnRequest = findViewById(R.id.btn_request);
+        if (btnRequest != null) {
+            btnSend.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, SendActivity.class);
+                int userId = getIntent().getIntExtra("user_id", -1);
+                intent.putExtra("user_id", userId);
+                startActivity(intent);
+            });
+        } else {
+            Log.e("HomeActivity", "btn_request not exist in layout");
+        }
+
         // Xử lý ẩn/hiện số dư khi nhấn vào icon mắt
         ivEyeIcon.setOnClickListener(v -> toggleBalanceVisibility());
     }
+    //Cấu hình và xử lý sự kiện của Bottom Navigation
 
-    /**
-     * Cấu hình và xử lý sự kiện của Bottom Navigation
-     */
-    private void setupBottomNavigation() {
+    private void setupBottomNavigation(int userId) {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -174,6 +190,7 @@ public class HomeActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_cashflow) {
                 Intent intent = new Intent(HomeActivity.this, StaticActivity.class);
+                intent.putExtra("user_id", userId); // Truyền userId
                 startActivity(intent);
                 return true;
             } else {
@@ -182,17 +199,12 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Cấu hình RecyclerViews
-     */
     private void setupRecyclerViews() {
         rvVouchers.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvStores.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    /**
-     * Xử lý ẩn/hiện số dư
-     */
+     // Xử lý ẩn/hiện số dư
     private void toggleBalanceVisibility() {
         if (isBalanceVisible) {
             tvBalanceValue.setText("••••••");
@@ -210,8 +222,6 @@ public class HomeActivity extends AppCompatActivity {
         }
         isBalanceVisible = !isBalanceVisible; // Đổi trạng thái
     }
-
-
     /**
      * Hiển thị thông báo lỗi
      */
@@ -219,5 +229,15 @@ public class HomeActivity extends AppCompatActivity {
         tvErrorMessage.setText(message);
         tvErrorMessage.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
+    }
+
+    private void showMotionToast(String title, String message, MotionToastStyle style) {
+        MotionToast.Companion.darkColorToast(this,
+                title,
+                message,
+                style,
+                MotionToast.GRAVITY_BOTTOM,
+                MotionToast.LONG_DURATION,
+                ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
     }
 }

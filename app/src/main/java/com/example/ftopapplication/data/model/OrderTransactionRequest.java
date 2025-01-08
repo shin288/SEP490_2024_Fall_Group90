@@ -125,4 +125,16 @@ public class OrderTransactionRequest implements Parcelable {
         }
         this.products.add(productOrder);
     }
+
+    @Override
+    public String toString() {
+        return "OrderTransactionRequest{" +
+                "userId=" + userId +
+                ", storeId=" + storeId +
+                ", voucherId=" + voucherId +
+                ", products=" + products +
+                ", note='" + note + '\'' +
+                ", totalPrice=" + totalPrice +
+                '}';
+    }
 }

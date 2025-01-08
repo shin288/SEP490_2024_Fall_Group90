@@ -1,14 +1,20 @@
 package com.example.ftopapplication.viewmodel.store;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.ftopapplication.data.model.ApiResponse;
+import com.example.ftopapplication.data.model.OrderTransactionRequest;
+import com.example.ftopapplication.data.model.OrderTransactionResponse;
 import com.example.ftopapplication.data.model.Product;
 import com.example.ftopapplication.data.model.Store;
 import com.example.ftopapplication.data.model.Voucher;
 import com.example.ftopapplication.data.repository.ProductRepository;
 import com.example.ftopapplication.data.repository.StoreRepository;
+import com.example.ftopapplication.data.repository.TransactionRepository;
 import com.example.ftopapplication.data.repository.VoucherRepository;
 
 import java.util.List;
@@ -18,6 +24,10 @@ public class StoreDetailViewModel extends ViewModel {
     private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
     private final VoucherRepository voucherRepository;
+    private final TransactionRepository transactionRepository;
+
+
+    private final MutableLiveData<ApiResponse<OrderTransactionResponse>> orderTransactionLiveData = new MutableLiveData<>();
 
     private final MutableLiveData<Store> storeLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<Product>> productLiveData = new MutableLiveData<>();
@@ -29,10 +39,11 @@ public class StoreDetailViewModel extends ViewModel {
     private final MutableLiveData<Boolean> isProductLoading = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> isVoucherLoading = new MutableLiveData<>(false);
 
-    public StoreDetailViewModel(StoreRepository storeRepository, ProductRepository productRepository, VoucherRepository voucherRepository) {
+    public StoreDetailViewModel(StoreRepository storeRepository, ProductRepository productRepository, VoucherRepository voucherRepository, TransactionRepository transactionRepository) {
         this.storeRepository = storeRepository;
         this.productRepository = productRepository;
         this.voucherRepository = voucherRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public LiveData<Store> getStoreLiveData() {
@@ -45,6 +56,10 @@ public class StoreDetailViewModel extends ViewModel {
 
     public LiveData<List<Voucher>> getVoucherLiveData() {
         return voucherLiveData;
+    }
+
+    public LiveData<ApiResponse<OrderTransactionResponse>> getOrderTransactionLiveData() {
+        return orderTransactionLiveData;
     }
 
     public LiveData<String> getErrorMessage() {
@@ -124,6 +139,30 @@ public class StoreDetailViewModel extends ViewModel {
             }
         });
     }
+
+    public void placeOrderWithTransaction(OrderTransactionRequest request) {
+        Log.d("StoreDetailViewModel", "Sending OrderTransactionRequest: " + request.toString());
+
+        transactionRepository.placeOrderWithTransaction(request, new TransactionRepository.OrderTransactionCallback() {
+            @Override
+            public void onSuccess(ApiResponse<OrderTransactionResponse> response) {
+                if (response.isSuccess()) {
+                    Log.d("StoreDetailViewModel", "Order placed successfully: " + response.getData());
+                    orderTransactionLiveData.postValue(response);
+                } else {
+                    Log.e("StoreDetailViewModel", "Failed to place order: " + response.getMessage());
+                    errorMessage.postValue(response.getMessage());
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Log.e("StoreDetailViewModel", "Error placing order: " + throwable.getMessage(), throwable);
+                errorMessage.postValue("Network error: " + throwable.getMessage());
+            }
+        });
+    }
+
 
     private void checkLoadingComplete() {
         if (!isStoreLoading.getValue() && !isProductLoading.getValue() && !isVoucherLoading.getValue()) {

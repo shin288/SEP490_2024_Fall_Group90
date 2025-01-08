@@ -51,6 +51,8 @@ dependencies {
     implementation("com.google.android.material:material:1.9.0")
     implementation ("com.auth0.android:jwtdecode:2.0.0")
     implementation ("com.github.Spikeysanju:MotionToast:1.4")
+    implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+
 
 
 }

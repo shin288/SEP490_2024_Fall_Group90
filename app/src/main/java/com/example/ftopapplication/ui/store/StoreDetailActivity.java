@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
@@ -27,6 +28,8 @@ import com.example.ftopapplication.data.model.OrderTransactionRequest;
 import com.example.ftopapplication.data.model.Product;
 import com.example.ftopapplication.data.model.ProductOrder;
 import com.example.ftopapplication.data.model.Store;
+import com.example.ftopapplication.data.model.User;
+import com.example.ftopapplication.data.repository.TransactionRepository;
 import com.example.ftopapplication.ui.pinentry.PinEntryActivity;
 import com.example.ftopapplication.viewmodel.store.StoreDetailViewModel;
 import com.example.ftopapplication.viewmodel.store.StoreDetailViewModelFactory;
@@ -103,6 +106,9 @@ public class StoreDetailActivity extends AppCompatActivity {
         rvVoucherList = findViewById(R.id.rv_voucher_list);
         tvSummaryPrice = findViewById(R.id.tv_summary_price);
         btnCheckout = findViewById(R.id.btn_checkout);
+        if (btnCheckout == null) {
+            Log.e("StoreDetailActivity", "btnCheckout is null. Check your layout file.");
+        }
 
         tvErrorMessage = findViewById(R.id.tv_error_message);
         appBarLayout = findViewById(R.id.appBarLayout);
@@ -120,7 +126,22 @@ public class StoreDetailActivity extends AppCompatActivity {
         rvProductList.setAdapter(productAdapter);
 
         rvVoucherList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        voucherAdapter = new VoucherAdapter(List.of());
+        voucherAdapter = new VoucherAdapter(List.of(), voucher -> {
+            if (voucher != null) {
+                // Nếu voucher được chọn
+                int discount = voucher.getVoucherDiscount();
+                productAdapter.setSelectedVoucherDiscount(discount);
+
+                // Tính lại tổng tiền
+                int updatedTotalPrice = productAdapter.getTotalPrice();
+                tvSummaryPrice.setText(String.format(Locale.getDefault(), "Total amount: %d đ", updatedTotalPrice));
+            } else {
+                // Nếu voucher bị hủy chọn
+                productAdapter.setSelectedVoucherDiscount(0); // Không có giảm giá
+                int updatedTotalPrice = productAdapter.getTotalPrice();
+                tvSummaryPrice.setText(String.format(Locale.getDefault(), "Total amount: %d đ", updatedTotalPrice));
+            }
+        });
         rvVoucherList.setAdapter(voucherAdapter);
     }
 
@@ -128,8 +149,9 @@ public class StoreDetailActivity extends AppCompatActivity {
         StoreRepository storeRepository = new StoreRepository(ApiClient.getApiService());
         ProductRepository productRepository = new ProductRepository(ApiClient.getApiService());
         VoucherRepository voucherRepository = new VoucherRepository(ApiClient.getApiService());
+        TransactionRepository transactionRepository = new TransactionRepository(ApiClient.getApiService());
 
-        StoreDetailViewModelFactory factory = new StoreDetailViewModelFactory(storeRepository, productRepository, voucherRepository);
+        StoreDetailViewModelFactory factory = new StoreDetailViewModelFactory(storeRepository, productRepository, voucherRepository,transactionRepository);
         viewModel = new ViewModelProvider(this, factory).get(StoreDetailViewModel.class);
     }
 
@@ -174,46 +196,85 @@ public class StoreDetailActivity extends AppCompatActivity {
 
 
     private void handleCheckout() {
-        int userId = getIntent().getIntExtra("user_id", -1); // Receive userId from Intent
-        int storeId = getIntent().getIntExtra("storeId", -1); // Receive storeId from Intent
-        int totalPrice = productAdapter.getTotalPrice(); // Total price from adapter
-        List<ProductOrder> selectedProducts = productAdapter.getSelectedProducts(); // List of selected products
+        // Lấy userId và storeId từ Intent
+        int userId = getIntent().getIntExtra("user_id", -1);
+        int storeId = getIntent().getIntExtra("storeId", -1);
 
-        // Validate data
-        if (userId == -1) {
-            showErrorMessage("User information is missing. Please log in again.");
-            return;
-        }
+        // Lắng nghe dữ liệu từ ViewModel
+        viewModel.getStoreLiveData().observe(this, store -> {
+            if (store != null) {
+                // Hiển thị thông tin store
+                collapsingToolbar.post(() -> {
+                    collapsingToolbar.setTitle(store.getStoreName());
+                    Glide.with(this)
+                            .load(store.getStoreImage().get(0))
+                            .placeholder(R.drawable.placeholder_image)
+                            .into(ivHeaderImage);
+                });
 
-        if (storeId == -1) {
-            showErrorMessage("Store information is missing. Please try again.");
-            return;
-        }
+                // Lấy userId của store (chủ sở hữu)
+                User storeUser = store.getUser(); // Assumes Store model has a User object
+                if (storeUser != null) {
+                    int receiverId = storeUser.getId(); // ID của owner
 
-        if (totalPrice <= 0 || selectedProducts.isEmpty()) {
-            showErrorMessage("Cart data is invalid. Please check your order.");
-            return;
-        }
+                    // Lấy thông tin từ Adapter
+                    int totalPrice = productAdapter.getTotalPrice();
+                    List<ProductOrder> selectedProducts = productAdapter.getSelectedProducts();
 
-        OrderTransactionRequest request = new OrderTransactionRequest(
-                userId,
-                storeId,
-                null, // Voucher ID (có thể null nếu không có voucher)
-                selectedProducts,
-                "Optional order note", // Ghi chú đơn hàng
-                totalPrice
-        );
+                    Log.d("StoreDetailActivity", "User ID: " + userId);
+                    Log.d("StoreDetailActivity", "Store ID: " + storeId);
+                    Log.d("StoreDetailActivity", "Total Price: " + totalPrice);
+                    Log.d("StoreDetailActivity", "Selected Products: " + selectedProducts);
 
-        // Truyền OrderTransactionRequest qua Intent
-        Intent intent = new Intent(StoreDetailActivity.this, PinEntryActivity.class);
-        intent.putExtra("order_request", request); // Sử dụng Parcelable để truyền
-        startActivity(intent);
+                    // Kiểm tra dữ liệu
+                    if (userId == -1) {
+                        showErrorMessage("User information is missing. Please log in again.");
+                        return;
+                    }
+
+                    if (storeId == -1) {
+                        showErrorMessage("Store information is missing. Please try again.");
+                        return;
+                    }
+
+                    if (totalPrice <= 0 || selectedProducts.isEmpty()) {
+                        showErrorMessage("Cart data is invalid. Please check your order.");
+                        return;
+                    }
+
+                    // Tạo request để truyền đi
+                    OrderTransactionRequest request = new OrderTransactionRequest(
+                            userId,
+                            storeId,
+                            null, // Voucher ID (nullable nếu không áp dụng voucher)
+                            selectedProducts,
+                            "Optional order note", // Ghi chú đơn hàng (tùy chọn)
+                            totalPrice
+                    );
+
+                    // Log request cho debug
+                    Log.d("StoreDetailActivity", "OrderTransactionRequest: " + request.toString());
+
+                    // Truyền dữ liệu qua PinEntryActivity
+                    Intent intent = new Intent(StoreDetailActivity.this, PinEntryActivity.class);
+                    intent.putExtra("orderRequest", request); // Truyền Parcelable object
+                    intent.putExtra("amount", totalPrice); // Tổng giá tiền
+                    intent.putExtra("receiver_id", receiverId); // ID của người nhận
+                    intent.putExtra("store_name", collapsingToolbar.getTitle().toString()); // Tên cửa hàng
+                    Log.d("StoreDetailActivity", "Intent Content: " + intent.getExtras());
+                    startActivity(intent);
+                } else {
+                    showErrorMessage("Store owner information is missing.");
+                }
+            } else {
+                showErrorMessage("Store data is unavailable.");
+            }
+        });
     }
 
-
     private void showErrorMessage(String message) {
-        tvErrorMessage.setText(message);
-        tvErrorMessage.setVisibility(View.VISIBLE);
+        Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+
     }
 
     private void showLoading(boolean isLoading) {

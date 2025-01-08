@@ -11,7 +11,7 @@ public class Order {
     private Date orderDate;
     private Integer voucherId; // nullable voucher
     private String note;
-    private double totalPrice;
+    private int totalPrice;
     private boolean isDeleted;
     private List<OrderItem> orderItems; // ánh xạ từ OneToMany orderItems
 
@@ -72,11 +72,11 @@ public class Order {
         this.note = note;
     }
 
-    public double getTotalPrice() {
+    public int getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(double totalPrice) {
+    public void setTotalPrice(int totalPrice) {
         this.totalPrice = totalPrice;
     }
 

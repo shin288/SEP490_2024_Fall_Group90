@@ -33,8 +33,8 @@ public class SignInViewModel extends ViewModel {
         return errorMessage;
     }
 
-    public void login(String email, String password) {
-        Call<TokenResponse> call = userRepository.loginUser(email, password);
+    public void login(String emailOrPhone, String password) {
+        Call<TokenResponse> call = userRepository.loginUser(emailOrPhone, password);
         call.enqueue(new Callback<TokenResponse>() {
             @Override
             public void onResponse(Call<TokenResponse> call, Response<TokenResponse> response) {

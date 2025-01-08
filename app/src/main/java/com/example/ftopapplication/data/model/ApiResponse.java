@@ -34,5 +34,9 @@ public class ApiResponse<T> {
     public void setStatus(int status) {
         this.status = status;
     }
+
+    public boolean isSuccess() {
+        return status == 200; // Bạn có thể tùy chỉnh logic kiểm tra trạng thái ở đây
+    }
 }
 

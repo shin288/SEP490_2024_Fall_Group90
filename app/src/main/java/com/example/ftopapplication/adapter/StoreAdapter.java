@@ -1,5 +1,6 @@
 package com.example.ftopapplication.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,49 +45,48 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.StoreViewHol
     public void onBindViewHolder(@NonNull StoreViewHolder holder, int position) {
         Store store = stores.get(position);
 
+        // Gán tên và địa chỉ cửa hàng
         holder.storeName.setText(store.getStoreName());
         holder.storeAddress.setText(store.getStoreAddress());
 
-        // Tối ưu hóa load ảnh
+        // URL cơ sở
+        String baseUrl = "http://172.20.80.1:8000"; // Base URL, có thể truyền từ constructor
+
+        // Mảng các ImageView trong layout
+        ImageView[] imageViews = {holder.largeImage, holder.smallImage1, holder.smallImage2};
+
+        // Danh sách ảnh từ store
         List<String> images = store.getStoreImage();
-        if (images != null && !images.isEmpty()) {
-            // Large Image
-            Glide.with(holder.itemView.getContext())
-                    .load(images.get(0))
-                    .placeholder(R.drawable.placeholder_image)
-                    .into(holder.largeImage);
 
-            // Small Image 1
-            if (images.size() > 1) {
-                Glide.with(holder.itemView.getContext())
-                        .load(images.get(1))
-                        .placeholder(R.drawable.placeholder_image)
-                        .into(holder.smallImage1);
+        // Load ảnh vào các ImageView
+        for (int i = 0; i < imageViews.length; i++) {
+            if (images != null && i < images.size()) {
+                // Load ảnh nếu có
+                loadImage(holder.itemView.getContext(), imageViews[i], baseUrl, images.get(i));
             } else {
-                holder.smallImage1.setImageResource(R.drawable.placeholder_image);
+                // Hiển thị placeholder nếu không có ảnh
+                imageViews[i].setImageResource(R.drawable.placeholder_image);
             }
-
-            // Small Image 2
-            if (images.size() > 2) {
-                Glide.with(holder.itemView.getContext())
-                        .load(images.get(2))
-                        .placeholder(R.drawable.placeholder_image)
-                        .into(holder.smallImage2);
-            } else {
-                holder.smallImage2.setImageResource(R.drawable.placeholder_image);
-            }
-        } else {
-            holder.largeImage.setImageResource(R.drawable.placeholder_image);
-            holder.smallImage1.setImageResource(R.drawable.placeholder_image);
-            holder.smallImage2.setImageResource(R.drawable.placeholder_image);
         }
 
-        // Click listener
+        // Xử lý click listener
         holder.itemView.setOnClickListener(v -> {
             if (onStoreClickListener != null) {
                 onStoreClickListener.onStoreClick(store);
             }
         });
+    }
+
+
+    private void loadImage(Context context, ImageView imageView, String baseUrl, String imagePath) {
+        if (imagePath != null && !imagePath.isEmpty()) {
+            Glide.with(context)
+                    .load(baseUrl + imagePath)
+                    .placeholder(R.drawable.placeholder_image)
+                    .into(imageView);
+        } else {
+            imageView.setImageResource(R.drawable.placeholder_image);
+        }
     }
 
     @Override

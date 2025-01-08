@@ -1,6 +1,8 @@
 package com.example.ftopapplication.data.model;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     private int id;
     private String email;
     private String displayName;
@@ -13,7 +15,17 @@ public class User {
     private boolean isActive;
 
 
+
     // Constructor
+
+    public User(String email, String displayName, String phoneNumber, String password,String avatar, boolean isActive) {
+        this.email = email;
+        this.displayName = displayName;
+        this.phoneNumber = phoneNumber;
+        this.password = password;
+        this.avatar = avatar;
+        this.isActive = isActive;
+    }
 
 
     public User(int id, String email, String displayName, String avatar, String phoneNumber, String role, String password, int pin, int walletBalance, boolean isActive) {
@@ -112,4 +124,15 @@ public class User {
     public void setActive(boolean active) {
         isActive = active;
     }
+
+    private transient String pinAsString; // Chỉ dùng cho API, không lưu trữ vĩnh viễn
+
+    public String getPinAsString() {
+        return String.valueOf(pin); // Chuyển int pin sang String khi gọi
+    }
+
+    public void setPinAsString(String pinAsString) {
+        this.pinAsString = pinAsString; // Cho phép thiết lập pinAsString thủ công nếu cần
+    }
+
 }

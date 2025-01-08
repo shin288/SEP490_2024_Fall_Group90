@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#8674F5">
+    android:background="#8C60ED">
 
     <!-- Header -->
     <LinearLayout
@@ -78,35 +78,34 @@
             android:paddingHorizontal="16dp">
 
             <Button
-                android:id="@+id/btn_100"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginEnd="16dp"
-                android:text="100 đ"
-                android:background="@drawable/rounded_button_preset_background" />
-
-            <Button
-                android:id="@+id/btn_500"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginEnd="16dp"
-                android:text="500 đ"
-                android:background="@drawable/rounded_button_preset_background" />
-
-            <Button
                 android:id="@+id/btn_1000"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                style="@style/PresetButtonStyle"
                 android:layout_marginEnd="16dp"
-                android:text="1,000 đ"
-                android:background="@drawable/rounded_button_preset_background" />
+                android:text="1000 đ" />
 
             <Button
-                android:id="@+id/btn_1500"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="1,500 đ"
-                android:background="@drawable/rounded_button_preset_background" />
+                android:id="@+id/btn_5000"
+                style="@style/PresetButtonStyle"
+                android:layout_marginEnd="16dp"
+                android:text="5000 đ"
+                 />
+
+            <Button
+                android:id="@+id/btn_10000"
+                style="@style/PresetButtonStyle"
+                android:layout_marginEnd="16dp"
+                android:text="10000 đ"
+                 />
+
+            <Button
+                android:id="@+id/btn_20000"
+                style="@style/PresetButtonStyle"
+                android:text="20000 đ" />
+
+            <Button
+                android:id="@+id/btn_50000"
+                style="@style/PresetButtonStyle"
+                android:text="50000 đ" />
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -137,15 +136,9 @@
         <Button
             android:id="@+id/btn_continue"
 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:background="@drawable/button_continue_background"
-            android:backgroundTint="@null"
-            android:theme="@null"
+            style="@style/ContinueButtonStyle"
             android:text="Continue"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
             android:enabled="false" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

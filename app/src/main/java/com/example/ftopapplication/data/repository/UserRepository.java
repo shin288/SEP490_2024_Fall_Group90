@@ -6,6 +6,7 @@ import com.example.ftopapplication.network.ApiClient;
 import com.example.ftopapplication.network.ApiService;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 
@@ -37,7 +38,17 @@ public class UserRepository {
         return apiService.searchUserByPhoneNumber(phoneNumber);
     }
 
-    public Call<TokenResponse> loginUser(String email, String password) {
-        return apiService.loginUser(email, password);
+    public Call<TokenResponse> loginUser(String emailOrPhone, String password) {
+        return apiService.loginUser(emailOrPhone, password);
     }
+
+    public Call<User> registerUser(User user) {
+        return apiService.registerUser(user);
+    }
+
+    public Call<Void> registerUserWithPayload(Map<String, Object> userPayload) {
+        return apiService.registerUserWithPayload(userPayload);
+    }
+
+
 }

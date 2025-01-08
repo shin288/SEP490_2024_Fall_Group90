@@ -1,6 +1,5 @@
 package com.example.ftopapplication.ui.transaction;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,104 +8,101 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.util.stream.Collectors;
-
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ftopapplication.R;
 import com.example.ftopapplication.data.model.Transaction;
-import com.example.ftopapplication.data.repository.TransactionRepository;
+import com.example.ftopapplication.viewmodel.transaction.TransactionHistoryViewModel;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import www.sanju.motiontoast.MotionToast;
+import www.sanju.motiontoast.MotionToastStyle;
 
 public class TransactionHistoryActivity extends AppCompatActivity {
 
     private Button btnAll, btnIncome, btnExpense;
     private LinearLayout transactionListContainer;
-    private TransactionRepository transactionRepository;
     private ImageView btnBack;
+    private TransactionHistoryViewModel viewModel;
+    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_history);
 
+        // Lấy userId từ Intent
+        userId = getIntent().getIntExtra("user_id", -1);
+
+        // Khởi tạo ViewModel
+        viewModel = new ViewModelProvider(this).get(TransactionHistoryViewModel.class);
+
+        // Khởi tạo giao diện
         btnAll = findViewById(R.id.btn_all);
         btnIncome = findViewById(R.id.btn_income);
         btnExpense = findViewById(R.id.btn_expense);
         transactionListContainer = findViewById(R.id.transaction_list_container);
+        btnBack = findViewById(R.id.btn_back);
 
-        transactionRepository = new TransactionRepository();
+        // Thiết lập nút Back
+        btnBack.setOnClickListener(v -> finish());
 
-        // Hiển thị tất cả giao dịch mặc định
+        // Quan sát dữ liệu từ ViewModel
+        setupObservers();
+
+        // Mặc định hiển thị tất cả giao dịch
         setActiveButton(btnAll);
-        fetchTransactions("all");
+        viewModel.fetchAllTransactions(userId);
 
-        // Nút lọc
+        // Thiết lập nút lọc giao dịch
         btnAll.setOnClickListener(v -> {
             setActiveButton(btnAll);
-            fetchTransactions("all");
+            viewModel.filterTransactions("all", userId);
         });
 
         btnIncome.setOnClickListener(v -> {
             setActiveButton(btnIncome);
-            fetchTransactions("income");
+            viewModel.filterTransactions("income", userId);
         });
 
         btnExpense.setOnClickListener(v -> {
             setActiveButton(btnExpense);
-            fetchTransactions("expense");
+            viewModel.filterTransactions("expense", userId);
         });
-
-
-        setContentView(R.layout.activity_transaction_history);
-
-        btnBack = findViewById(R.id.btn_back); // Ánh xạ nút Back
-
-        btnBack.setOnClickListener(v -> finish()); // Quay lại màn trước
     }
 
-    private void fetchTransactions(String filterType) {
-        int userId = 1; // Thay thế bằng ID người dùng thực tế
-        transactionRepository.getAllTransactionsForUser(userId).enqueue(new Callback<List<Transaction>>() {
-            @Override
-            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Transaction> transactions = response.body();
-                    if ("income".equals(filterType)) {
-                        updateTransactionList(filterTransactions(transactions, true));
-                    } else if ("expense".equals(filterType)) {
-                        updateTransactionList(filterTransactions(transactions, false));
-                    } else {
-                        updateTransactionList(transactions);
-                    }
-                } else {
-                    Toast.makeText(TransactionHistoryActivity.this, "Failed to load transactions", Toast.LENGTH_SHORT).show();
-                }
+    private void setupObservers() {
+        viewModel.getTransactionsLiveData().observe(this, transactions -> {
+            if (transactions != null && !transactions.isEmpty()) {
+                updateTransactionList(transactions);
+            } else {
+                showMotionToast("Info", "No transactions available!", MotionToastStyle.INFO);
             }
+        });
 
-            @Override
-            public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                Toast.makeText(TransactionHistoryActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+        viewModel.getErrorLiveData().observe(this, errorMessage -> {
+            if (errorMessage != null) {
+                showMotionToast("Error", errorMessage, MotionToastStyle.ERROR);
             }
         });
     }
 
-    private List<Transaction> filterTransactions(List<Transaction> transactions, boolean isIncome) {
-        return transactions.stream()
-                .filter(transaction -> transaction.isStatus() == isIncome)
-                .collect(Collectors.toList());
+    private void showMotionToast(String title, String message, MotionToastStyle style) {
+        MotionToast.Companion.darkColorToast(this,
+                title,
+                message,
+                style,
+                MotionToast.GRAVITY_BOTTOM,
+                MotionToast.LONG_DURATION,
+                ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
     }
-
 
     private void updateTransactionList(List<Transaction> transactions) {
-        transactionListContainer.removeAllViews(); // Xóa giao dịch cũ
+        transactionListContainer.removeAllViews(); // Xóa danh sách cũ
 
         for (Transaction transaction : transactions) {
             View transactionItemView = LayoutInflater.from(this).inflate(R.layout.transaction_item, transactionListContainer, false);
@@ -118,10 +114,12 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
             // Thiết lập dữ liệu
             titleTextView.setText(transaction.getTransactionDescription());
-            dateTextView.setText(transaction.getTransactionDate().toString()); // Định dạng nếu cần
-            amountTextView.setText((transaction.isStatus() ? "+" : "-") + "$" + transaction.getTransactionAmount());
-            amountTextView.setTextColor(transaction.isStatus() ? Color.parseColor("#008000") : Color.parseColor("#FF0000"));
-            iconImageView.setImageResource(transaction.isStatus() ? R.drawable.ic_income : R.drawable.ic_expense);
+            dateTextView.setText(transaction.getTransactionDate().toString());
+            amountTextView.setText((transaction.getReceiveUserId() == userId ? "+" : "-") + "$" + transaction.getTransactionAmount());
+            amountTextView.setTextColor(transaction.getReceiveUserId() == userId
+                    ? getResources().getColor(R.color.income_color)
+                    : getResources().getColor(R.color.expense_color));
+            iconImageView.setImageResource(transaction.getReceiveUserId() == userId ? R.drawable.ic_income : R.drawable.ic_expense);
 
             // Thêm vào danh sách
             transactionListContainer.addView(transactionItemView);
@@ -129,16 +127,15 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     }
 
     private void setActiveButton(Button activeButton) {
-        btnAll.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button_background_disabled));
-        btnIncome.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button_background_disabled));
-        btnExpense.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button_background_disabled));
+        btnAll.setBackgroundResource(R.drawable.rounded_button_background_disabled);
+        btnIncome.setBackgroundResource(R.drawable.rounded_button_background_disabled);
+        btnExpense.setBackgroundResource(R.drawable.rounded_button_background_disabled);
 
-        btnAll.setTextColor(Color.parseColor("#888888"));
-        btnIncome.setTextColor(Color.parseColor("#888888"));
-        btnExpense.setTextColor(Color.parseColor("#888888"));
+        btnAll.setTextColor(getResources().getColor(R.color.disabled_text_color));
+        btnIncome.setTextColor(getResources().getColor(R.color.disabled_text_color));
+        btnExpense.setTextColor(getResources().getColor(R.color.disabled_text_color));
 
-        activeButton.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button_background));
-        activeButton.setTextColor(Color.parseColor("#FFA500"));
+        activeButton.setBackgroundResource(R.drawable.rounded_button_background);
+        activeButton.setTextColor(getResources().getColor(R.color.active_text_color));
     }
-
 }

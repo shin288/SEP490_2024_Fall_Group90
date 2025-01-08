@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.ftopapplication.ui.signup.SetNewPinActivity;
+
 public class OtpVerificationActivity extends AppCompatActivity {
 
     private EditText otpDigit1, otpDigit2, otpDigit3, otpDigit4;

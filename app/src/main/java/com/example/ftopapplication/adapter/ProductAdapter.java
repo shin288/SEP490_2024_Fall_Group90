@@ -25,6 +25,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     private List<Product> productList;
     private final Map<Integer, Integer> productQuantities = new HashMap<>();
     private final OnQuantityChangeListener onQuantityChangeListener;
+    private int selectedVoucherDiscount = 0;
 
     public ProductAdapter(List<Product> productList, OnQuantityChangeListener onQuantityChangeListener) {
         this.productList = productList;
@@ -40,12 +41,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         productQuantities.clear(); // Xóa số lượng sản phẩm trong giỏ hàng
         notifyDataSetChanged(); // Cập nhật RecyclerView
     }
+    public void setSelectedVoucherDiscount(int voucherDiscount) {
+        this.selectedVoucherDiscount = voucherDiscount;
+    }
+
     public int getTotalPrice() {
         int totalPrice = 0;
         for (Product product : productList) {
             int quantity = productQuantities.getOrDefault(product.getProductId(), 0);
             totalPrice += quantity * product.getProductPrice();
         }
+
+        // Áp dụng giảm giá từ voucher
+        if (selectedVoucherDiscount > 0) {
+            totalPrice -= totalPrice * selectedVoucherDiscount / 100;
+        }
+
         return totalPrice;
     }
 
@@ -87,6 +98,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         updateQuantityUI(holder, product.getProductId());
 
+        // Cập nhật số lượng và tổng giá tiền
+        int quantity = productQuantities.getOrDefault(product.getProductId(), 0);
+        holder.tvQuantity.setText(String.valueOf(quantity));
+        int total = quantity * product.getProductPrice();
+        holder.tvProductTotal.setText(String.format(Locale.getDefault(), "Total: %d đ", total));
+
+        // Hiển thị hoặc ẩn nút giảm số lượng và số lượng
+        holder.tvQuantity.setVisibility(quantity > 0 ? View.VISIBLE : View.GONE);
+        holder.btnDecrease.setVisibility(quantity > 0 ? View.VISIBLE : View.GONE);
+
         holder.btnIncrease.setOnClickListener(v -> updateQuantity(product.getProductId(), holder, true));
         holder.btnDecrease.setOnClickListener(v -> updateQuantity(product.getProductId(), holder, false));
     }
@@ -105,6 +126,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.tvQuantity.setText(String.valueOf(quantity));
         holder.tvQuantity.setVisibility(quantity > 0 ? View.VISIBLE : View.GONE);
         holder.btnDecrease.setVisibility(quantity > 0 ? View.VISIBLE : View.GONE);
+
+        // Cập nhật tổng giá tiền
+        Product product = getProductById(productId); // Tạo phương thức lấy sản phẩm theo ID
+        if (product != null) {
+            int total = quantity * product.getProductPrice();
+            holder.tvProductTotal.setText(String.format(Locale.getDefault(), "Total: %d đ", total));
+        }
+    }
+
+    private Product getProductById(int productId) {
+        for (Product product : productList) {
+            if (product.getProductId() == productId) {
+                return product;
+            }
+        }
+        return null; // Không tìm thấy sản phẩm
     }
 
     private void notifyQuantityChanged() {
@@ -132,7 +169,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     }
 
     static class ProductViewHolder extends RecyclerView.ViewHolder {
-        TextView tvProductName, tvProductPrice, tvQuantity;
+        TextView tvProductName, tvProductPrice, tvQuantity,tvProductTotal;
         ImageView ivProductImage;
         ImageButton btnIncrease, btnDecrease;
 
@@ -141,6 +178,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             tvProductName = itemView.findViewById(R.id.tv_product_name);
             tvProductPrice = itemView.findViewById(R.id.tv_product_price);
             tvQuantity = itemView.findViewById(R.id.tv_quantity);
+            tvProductTotal = itemView.findViewById(R.id.tv_product_total);
             ivProductImage = itemView.findViewById(R.id.iv_product_image);
             btnIncrease = itemView.findViewById(R.id.btn_increase);
             btnDecrease = itemView.findViewById(R.id.btn_decrease);
