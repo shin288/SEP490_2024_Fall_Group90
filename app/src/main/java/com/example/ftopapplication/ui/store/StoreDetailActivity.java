@@ -3,6 +3,7 @@ package com.example.ftopapplication.ui.store;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 
 
@@ -20,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 import com.example.ftopapplication.R;
 import com.example.ftopapplication.adapter.ProductAdapter;
@@ -29,6 +32,7 @@ import com.example.ftopapplication.data.model.Product;
 import com.example.ftopapplication.data.model.ProductOrder;
 import com.example.ftopapplication.data.model.Store;
 import com.example.ftopapplication.data.model.User;
+import com.example.ftopapplication.data.model.Voucher;
 import com.example.ftopapplication.data.repository.TransactionRepository;
 import com.example.ftopapplication.ui.pinentry.PinEntryActivity;
 import com.example.ftopapplication.viewmodel.store.StoreDetailViewModel;
@@ -54,6 +58,7 @@ public class StoreDetailActivity extends AppCompatActivity {
     private ProductAdapter productAdapter;
     private VoucherAdapter voucherAdapter;
 
+    private LottieAnimationView lottieViewDetail;
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbar;
@@ -98,6 +103,7 @@ public class StoreDetailActivity extends AppCompatActivity {
         });
 
         observeViewModel();
+        lottieViewDetail.setOnClickListener(v -> showDetailDialog());
     }
 
     private void initViews() {
@@ -105,6 +111,7 @@ public class StoreDetailActivity extends AppCompatActivity {
         rvProductList = findViewById(R.id.rv_product_list);
         rvVoucherList = findViewById(R.id.rv_voucher_list);
         tvSummaryPrice = findViewById(R.id.tv_summary_price);
+        lottieViewDetail = findViewById(R.id.lottie_view_detail);
         btnCheckout = findViewById(R.id.btn_checkout);
         if (btnCheckout == null) {
             Log.e("StoreDetailActivity", "btnCheckout is null. Check your layout file.");
@@ -143,7 +150,44 @@ public class StoreDetailActivity extends AppCompatActivity {
             }
         });
         rvVoucherList.setAdapter(voucherAdapter);
+
     }
+
+    private void showDetailDialog() {
+        int originalTotalPrice = productAdapter.getOriginalTotalPrice();  // Tổng tiền gốc
+        int discountPercent = 0;
+        int discountAmount = 0;
+
+        // Lấy voucher đã chọn và tính số tiền giảm giá
+        Voucher selectedVoucher = voucherAdapter.getSelectedVoucher();
+        if (selectedVoucher != null) {
+            discountPercent = selectedVoucher.getVoucherDiscount();  // Lấy % giảm giá
+            discountAmount = originalTotalPrice * discountPercent / 100;  // Tính số tiền giảm giá
+        }
+
+        int finalTotalPrice = originalTotalPrice - discountAmount;  // Tính tổng tiền sau giảm
+
+        // Inflate dialog
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_price_detail, null);
+        TextView tvOriginalPrice = dialogView.findViewById(R.id.tv_original_price);
+        TextView tvDiscount = dialogView.findViewById(R.id.tv_discount);
+        TextView tvFinalPrice = dialogView.findViewById(R.id.tv_final_price);
+        Button btnClose = dialogView.findViewById(R.id.btn_close);
+
+        // Hiển thị thông tin chi tiết
+        tvOriginalPrice.setText(String.format(Locale.getDefault(), "Original Total: %,d đ", originalTotalPrice));
+        tvDiscount.setText(String.format(Locale.getDefault(), "Voucher Discount: -%,d đ", discountAmount));
+        tvFinalPrice.setText(String.format(Locale.getDefault(), "Final Total: %,d đ", finalTotalPrice));
+
+        // Tạo và hiển thị dialog
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
 
     private void initViewModel() {
         StoreRepository storeRepository = new StoreRepository(ApiClient.getApiService());

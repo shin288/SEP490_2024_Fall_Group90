@@ -45,6 +45,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.selectedVoucherDiscount = voucherDiscount;
     }
 
+    public int getOriginalTotalPrice() {
+        int totalPrice = 0;
+        for (Product product : productList) {
+            int quantity = productQuantities.getOrDefault(product.getProductId(), 0);
+            totalPrice += quantity * product.getProductPrice();
+        }
+        return totalPrice;
+    }
+
     public int getTotalPrice() {
         int totalPrice = 0;
         for (Product product : productList) {

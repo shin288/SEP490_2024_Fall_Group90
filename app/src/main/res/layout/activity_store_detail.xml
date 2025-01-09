@@ -63,11 +63,11 @@
                 android:id="@+id/tv_voucher_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:text="Voucher"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="8dp" />
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_voucher_list"
@@ -80,12 +80,12 @@
                 android:id="@+id/tv_menu_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Menu"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="8dp"
+                android:text="Menu"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_product_list"
@@ -112,26 +112,35 @@
             android:padding="16dp">
 
             <!-- Tổng giá tiền -->
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/lottie_view_detail"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/viewdetail" />
+
             <TextView
                 android:id="@+id/tv_summary_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Total Price: 0 đ"
-
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
                 android:layout_gravity="end"
+
                 android:layout_marginEnd="10dp"
-                />
+                android:text="Total Price: 0 đ"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <!-- Nút thanh toán -->
             <Button
                 android:id="@+id/btn_checkout"
                 style="@style/CheckoutButtonStyle"
-                android:text="Check out"
+                android:layout_marginTop="16dp"
 
-                android:layout_marginTop="16dp" />
+                android:text="Check out" />
         </LinearLayout>
 
     </FrameLayout>

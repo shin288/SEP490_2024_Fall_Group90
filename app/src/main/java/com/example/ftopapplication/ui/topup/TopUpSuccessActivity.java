@@ -17,9 +17,9 @@ public class TopUpSuccessActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_up_success);
 
-        amountText = findViewById(R.id.amount_text);
-        balanceText = findViewById(R.id.balance_text);
-        Button okButton = findViewById(R.id.ok_button);
+        TextView amountText = findViewById(R.id.topup_amount);
+
+        Button okButton = findViewById(R.id.done_button);
 
         String amount = getIntent().getStringExtra("amount");
         String balance = getIntent().getStringExtra("balance");

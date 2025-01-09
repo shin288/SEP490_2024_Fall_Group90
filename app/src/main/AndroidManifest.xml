@@ -15,6 +15,12 @@
         android:theme="@style/Theme.FTOPApplication"
         tools:targetApi="31">
         <activity
+            android:name=".ui.profile.ProfileSettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.profile.ProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.withdraw.WithDrawSuccess"
             android:exported="true">
             <intent-filter>
