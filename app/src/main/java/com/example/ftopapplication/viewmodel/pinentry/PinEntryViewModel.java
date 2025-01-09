@@ -13,6 +13,8 @@ import com.example.ftopapplication.data.repository.TransactionRepository;
 
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -84,15 +86,18 @@ public class PinEntryViewModel extends ViewModel {
     }
 
     public void transferMoney(int senderUserId, int receiverUserId, int amount, TransactionRepository.SingleTransactionCallback callback) {
-        Transaction transaction = new Transaction();
-        transaction.setTransferUserId(senderUserId);
-        transaction.setReceiveUserId(receiverUserId);
-        transaction.setTransactionAmount(amount);
-        transaction.setTransactionDescription("Transfer via app");
-        transaction.setStatus(true);
+        String payload = "{"
+                + "\"transferUserId\": " + senderUserId + ","
+                + "\"receiveUserId\": " + receiverUserId + ","
+                + "\"amount\": " + amount + ","
+                + "\"description\": \"Chuyển tiền từ ứng dụng\","
+                + "\"status\": false"
+                + "}";
 
-        transactionRepository.transferMoneySingle(transaction, callback);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), payload);
+        transactionRepository.transferMoneySingle(body, callback);
     }
+
 
 
 

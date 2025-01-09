@@ -6,7 +6,8 @@ import java.util.Date;
 
 public class Transaction {
 
-    private int transactionId;
+    @JsonIgnore
+    private transient int transactionId;
     private int transferUserId;  // ID người gửi (sửa từ User senderId)
     private int receiveUserId;   // ID người nhận (sửa từ User receiverId)
     private int transactionAmount; // Số tiền giao dịch (sửa từ amount)

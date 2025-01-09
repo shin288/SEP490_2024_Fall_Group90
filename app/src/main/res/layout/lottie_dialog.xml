@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:background="@drawable/dialog_background"
+    android:gravity="center_vertical">
+
+    <!-- Lottie Animation -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottieAnimationView"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:lottie_rawRes="@raw/alert_animation"
+        app:lottie_loop="true"
+        app:lottie_autoPlay="true"
+        android:layout_marginEnd="16dp" />
+
+    <!-- Container for Text and Button -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="end">
+
+        <!-- Message -->
+        <TextView
+            android:id="@+id/tvDialogMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your wallet balance is less than the transfer amount. Please top up!"
+            android:textSize="16sp"
+            android:gravity="start"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Go to Home Button -->
+        <Button
+            android:id="@+id/btnGoToHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Go to Home"
+            android:layout_marginEnd="20dp"
+            android:backgroundTint="@color/blue_background"
+            android:textColor="@android:color/white"
+            android:layout_gravity="end" />
+    </LinearLayout>
+</LinearLayout>

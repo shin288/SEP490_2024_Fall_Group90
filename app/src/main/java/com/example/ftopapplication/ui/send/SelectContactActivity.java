@@ -2,6 +2,7 @@ package com.example.ftopapplication.ui.send;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -69,22 +70,13 @@ public class SelectContactActivity extends AppCompatActivity {
         btnSend.setOnClickListener(v -> {
             int receiverId = selectContactViewModel.getSelectedContactId().getValue();
 
-
-            if (balance <= 0) {
-                Toast.makeText(this, "Your wallet balance is insufficient. Please top up!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (balance < amount) {
-                Toast.makeText(this, "Your wallet balance is less than the transfer amount. Please top up!", Toast.LENGTH_SHORT).show();
-                return;
-            }
             if (selectContactViewModel.getSenderUserId().getValue() == receiverId) {
                 Toast.makeText(this, "You cannot send money to yourself", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Thực hiện chuyển tiền nếu mọi điều kiện hợp lệ
-            selectContactViewModel.performTransfer(senderUserId, receiverId, amount);
+            navigateToPinEntry();
         });
 
     }
@@ -114,11 +106,18 @@ public class SelectContactActivity extends AppCompatActivity {
 
 
     private void navigateToPinEntry() {
+        int senderUserId = selectContactViewModel.getSenderUserId().getValue();
+        int receiverUserId = selectContactViewModel.getSelectedContactId().getValue();
+        int amount = selectContactViewModel.getAmount().getValue();
+        int balance = selectContactViewModel.getBalance().getValue();
+        boolean isTransfer  = true;
+
         Intent intent = new Intent(this, PinEntryActivity.class);
-        intent.putExtra("transfer_user_id", selectContactViewModel.getSenderUserId().getValue());
-        intent.putExtra("receiver_user_id", selectContactViewModel.getSelectedContactId().getValue());
-        intent.putExtra("amount", selectContactViewModel.getAmount().getValue());
-        intent.putExtra("is_transfer", true); // Đánh dấu đây là giao dịch chuyển tiền
+        intent.putExtra("transfer_user_id", senderUserId);
+        intent.putExtra("receiver_user_id", receiverUserId);
+        intent.putExtra("amount", amount);
+        intent.putExtra("balance", balance);
+        intent.putExtra("is_transfer", isTransfer);
         startActivity(intent);
     }
 }

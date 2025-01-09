@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.example.ftopapplication.R;
 import com.example.ftopapplication.data.model.ApiResponse;
 import com.example.ftopapplication.data.model.OrderTransactionRequest;
@@ -55,25 +57,30 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
 
         // Retrieve data từ Intent
         Intent intent = getIntent();
+        boolean isTransfer = intent.getBooleanExtra("is_transfer", false); // Nhận giá trị is_transfer
         amount = intent.getIntExtra("amount", 0);
-        receiverUserId = intent.getIntExtra("receiver_id", -1);
-        userId = intent.getIntExtra("user_id", -1); // Lấy userId từ Intent
-        orderRequest = intent.getParcelableExtra("orderRequest");
+        receiverUserId = intent.getIntExtra("receiver_user_id", -1);
+        userId = intent.getIntExtra("transfer_user_id", -1); // Lấy transfer_user_id thay vì user_id
+        int balance = intent.getIntExtra("balance", 0); // Nhận số dư ví
 
-        // Lấy userId từ orderRequest
-        if (orderRequest != null) {
-            userId = orderRequest.getUserId(); // Lấy userId từ orderRequest
+        if (isTransfer) {
+            // Kiểm tra điều kiện dữ liệu chuyển tiền
+            if (userId == -1 || receiverUserId == -1) {
+                showMotionToast("Error", "Invalid user details. Please try again.", MotionToastStyle.ERROR);
+                finish();
+                return;
+            }
+
         } else {
-            showMotionToast("Error", "Order data is invalid. Please try again.", MotionToastStyle.ERROR);
-            finish();
-            return;
-        }
+            // Xử lý logic đặt hàng
+            orderRequest = intent.getParcelableExtra("orderRequest");
 
-        // Kiểm tra userId hợp lệ
-        if (userId == -1) {
-            showMotionToast("Error", "Invalid User ID. Please try again.", MotionToastStyle.ERROR);
-            finish();
-            return;
+            if (orderRequest == null) {
+                showMotionToast("Error", "Order data is invalid. Please try again.", MotionToastStyle.ERROR);
+                finish();
+                return;
+            }
+            userId = orderRequest.getUserId(); // Lấy userId từ orderRequest nếu là luồng đặt hàng
         }
 
         btnBack.setOnClickListener(v -> finish());
@@ -99,14 +106,16 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
 
     private void validatePin() {
         if (viewModel == null) {
-            showMotionToast("Error", "ViewModel not initialized. Cannot process order.", MotionToastStyle.ERROR);
+            showMotionToast("Error", "ViewModel not initialized. Cannot process transaction.", MotionToastStyle.ERROR);
             return;
         }
+
+        boolean isTransfer = getIntent().getBooleanExtra("is_transfer", false); // Nhận giá trị is_transfer
+        Log.d("PinEntryActivity", "Validating PIN. Is Transfer: " + isTransfer);
 
         viewModel.verifyPin(userId, enteredPin, new TransactionRepository.UserCallback() {
             @Override
             public void onSuccess(User user) {
-                boolean isTransfer = getIntent().getBooleanExtra("is_transfer", false);
                 if (isTransfer) {
                     performTransfer();
                 } else {
@@ -116,7 +125,7 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
 
             @Override
             public void onError(Throwable throwable) {
-                if (throwable.getMessage().equalsIgnoreCase("Incorrect PIN")) {
+                if ("Incorrect PIN".equalsIgnoreCase(throwable.getMessage())) {
                     showMotionToast("PIN Error", "The PIN you entered is incorrect. Please try again.", MotionToastStyle.WARNING);
                     resetPin();
                 } else {
@@ -127,16 +136,28 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
     }
 
     private void performTransfer() {
-        int transferUserId = getIntent().getIntExtra("transfer_user_id", -1); // Lấy transferUserId
+        int transferUserId = getIntent().getIntExtra("transfer_user_id", -1);
         int receiverUserId = getIntent().getIntExtra("receiver_user_id", -1);
         int transferAmount = getIntent().getIntExtra("amount", 0);
+        int balance = getIntent().getIntExtra("balance", 0);
+
+        // Kiểm tra các điều kiện
+        if (balance < transferAmount) {
+            showInsufficientBalanceDialog();
+            return;
+        }
 
         if (transferUserId == -1 || receiverUserId == -1) {
             showMotionToast("Error", "Invalid user details. Please try again.", MotionToastStyle.ERROR);
             return;
         }
 
-        viewModel.transferMoney(userId, receiverUserId, transferAmount, new TransactionRepository.SingleTransactionCallback() {
+        if (transferAmount <= 0) {
+            showMotionToast("Error", "Invalid transfer amount. Please enter a valid amount.", MotionToastStyle.ERROR);
+            return;
+        }
+
+        viewModel.transferMoney(transferUserId, receiverUserId, transferAmount, new TransactionRepository.SingleTransactionCallback() {
             @Override
             public void onSuccess(Transaction transaction) {
                 navigateToSuccessScreen(transaction.getTransactionAmount(), "Transfer completed successfully!");
@@ -144,7 +165,7 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
 
             @Override
             public void onError(Throwable throwable) {
-                if (throwable.getMessage().equalsIgnoreCase("Insufficient balance")) {
+                if ("Insufficient balance".equalsIgnoreCase(throwable.getMessage())) {
                     showMotionToast("Error", "Insufficient balance. Please top up!", MotionToastStyle.WARNING);
                 } else {
                     showMotionToast("Error", "Transfer failed. Please try again.", MotionToastStyle.ERROR);
@@ -152,8 +173,6 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
             }
         });
     }
-
-
 
     private void placeOrder() {
         if (orderRequest != null) {
@@ -165,7 +184,7 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
 
                 @Override
                 public void onError(Throwable throwable) {
-                    if (throwable.getMessage().equalsIgnoreCase("Insufficient balance")) {
+                    if ("Insufficient balance".equalsIgnoreCase(throwable.getMessage())) {
                         showInsufficientBalanceDialog();
                     } else {
                         showMotionToast("Error", "Failed to place order. Please try again.", MotionToastStyle.ERROR);
@@ -178,19 +197,20 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
     }
 
     private void showInsufficientBalanceDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Insufficient Balance")
-                .setMessage("Your wallet balance is not sufficient to complete this transaction. Please add funds or try a different method.")
-                .setPositiveButton("Back to Home", (dialog, which) -> {
+        showLottieDialog(
+                "Your wallet balance is less than the transfer amount. Please top up!",
+                () -> {
+                    // Điều hướng về màn hình Home
                     Intent intent = new Intent(this, HomeActivity.class);
                     intent.putExtra("user_id", userId); // Truyền userId về Home
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
-                })
-                .setCancelable(false)
-                .show();
+                }
+        );
     }
+
+
 
     private void resetPin() {
         enteredPin = 0;
@@ -244,4 +264,36 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
                 MotionToast.LONG_DURATION,
                 ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
     }
+
+    private void showLottieDialog(String message, Runnable onPositiveButtonClick) {
+        // Inflate layout
+        View dialogView = getLayoutInflater().inflate(R.layout.lottie_dialog, null);
+
+        // Tạo AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        // Ánh xạ view trong layout
+        LottieAnimationView lottieAnimationView = dialogView.findViewById(R.id.lottieAnimationView);
+        TextView tvDialogMessage = dialogView.findViewById(R.id.tvDialogMessage);
+        Button btnGoToHome = dialogView.findViewById(R.id.btnGoToHome);
+
+        // Set thông điệp cho dialog
+        tvDialogMessage.setText(message);
+
+        // Gán sự kiện cho button
+        btnGoToHome.setOnClickListener(v -> {
+            dialog.dismiss(); // Đóng dialog
+            if (onPositiveButtonClick != null) {
+                onPositiveButtonClick.run(); // Thực hiện hành động
+            }
+        });
+
+        // Hiển thị dialog
+        dialog.show();
+    }
+
 }

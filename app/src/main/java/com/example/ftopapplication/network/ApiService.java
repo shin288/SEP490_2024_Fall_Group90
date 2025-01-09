@@ -17,6 +17,7 @@ import com.example.ftopapplication.data.model.Voucher;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
@@ -59,7 +60,7 @@ public interface ApiService {
 
     // API chuyển tiền
     @POST("api/transaction/transfer")
-    Call<Transaction> transferMoney(@Body Transaction transaction);
+    Call<Transaction> transferMoney(@Body RequestBody body);
 
     @GET("/api/transaction/searchAll/{userId}")
     Call<List<Transaction>> getAllTransactionsForUser(@Path("userId") int userId);

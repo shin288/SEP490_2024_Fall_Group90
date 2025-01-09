@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.List;
 
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Callback;
@@ -35,12 +36,9 @@ public class TransactionRepository {
     }
 
     // Thực hiện chuyển tiền
-    public Call<Transaction> transferMoney(Transaction transaction) {
-        return apiService.transferMoney(transaction);
+    public Call<Transaction> transferMoney(RequestBody body) {
+        return apiService.transferMoney(body);
     }
-
-
-
 
     // Đặt hàng với giao dịch
     public void placeOrderWithTransaction(OrderTransactionRequest request, OrderTransactionCallback callback) {
@@ -124,8 +122,8 @@ public class TransactionRepository {
         });
     }
 
-    public void transferMoneySingle(Transaction transaction, SingleTransactionCallback callback) {
-        apiService.transferMoney(transaction).enqueue(new Callback<Transaction>() {
+    public void transferMoneySingle(RequestBody body, SingleTransactionCallback callback) {
+        apiService.transferMoney(body).enqueue(new Callback<Transaction>() {
             @Override
             public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                 if (response.isSuccessful() && response.body() != null) {

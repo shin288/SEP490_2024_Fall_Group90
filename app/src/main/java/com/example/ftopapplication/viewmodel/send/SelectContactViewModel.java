@@ -11,6 +11,8 @@ import com.example.ftopapplication.data.repository.UserRepository;
 
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -94,18 +96,27 @@ public class SelectContactViewModel extends ViewModel {
     }
 
     public void performTransfer(int senderId, int receiverId, int transactionAmount) {
-        Transaction transaction = new Transaction();
-        transaction.setTransferUserId(senderId);
-        transaction.setReceiveUserId(receiverId);
-        transaction.setTransactionAmount(transactionAmount);
-        transaction.setTransactionDescription("Chuyển tiền từ ứng dụng");
+        // Tạo payload JSON thủ công
+        String payload = "{"
+                + "\"transferUserId\": " + senderId + ","
+                + "\"receiveUserId\": " + receiverId + ","
+                + "\"amount\": " + transactionAmount + ","
+                + "\"description\": \"Transfer via app\"," // Đây là "description" thay vì "transactionDescription"
+                + "\"status\": false"
+                + "}";
 
-        transactionRepository.transferMoney(transaction).enqueue(new Callback<Transaction>() {
+        // Tạo RequestBody từ payload JSON
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), payload);
+
+        // Gọi API qua Retrofit
+        transactionRepository.transferMoney(body).enqueue(new Callback<Transaction>() {
             @Override
             public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                 if (response.isSuccessful()) {
+                    // Thành công
                     transferSuccess.setValue(true);
                 } else {
+                    // Thất bại
                     transferSuccess.setValue(false);
                     errorMessage.setValue("Transfer failed: " + response.message());
                 }
@@ -113,11 +124,13 @@ public class SelectContactViewModel extends ViewModel {
 
             @Override
             public void onFailure(Call<Transaction> call, Throwable t) {
+                // Lỗi mạng hoặc kết nối
                 transferSuccess.setValue(false);
                 errorMessage.setValue("Error: " + t.getMessage());
             }
         });
     }
+
 
     public void fetchFilteredUsers() {
         userRepository.getFilteredUsers(new UserRepository.UserCallback() {
