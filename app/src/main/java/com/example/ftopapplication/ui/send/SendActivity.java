@@ -26,6 +26,12 @@ public class SendActivity extends AppCompatActivity implements NumberPadFragment
         // Initialize ViewModel
         sendViewModel = new ViewModelProvider(this).get(SendViewModel.class);
 
+        int userId = getIntent().getIntExtra("user_id", -1);
+        int balance = getIntent().getIntExtra("balance", 0);
+        sendViewModel.setUserId(userId); // Lưu vào ViewModel
+        sendViewModel.setUserBalance(balance);
+
+
         tvAmount = findViewById(R.id.tv_amount);
         btnContinue = findViewById(R.id.btn_continue);
 
@@ -52,13 +58,14 @@ public class SendActivity extends AppCompatActivity implements NumberPadFragment
         btnContinue.setOnClickListener(v -> {
             Intent intent = new Intent(this, SelectContactActivity.class);
             intent.putExtra("amount", sendViewModel.getAmount().getValue());
-            intent.putExtra("userId", sendViewModel.getUserId().getValue());
+            intent.putExtra("user_id", userId);
+            intent.putExtra("balance", sendViewModel.getUserBalance().getValue());
             startActivity(intent);
         });
     }
 
     private void updateAmountDisplay(int amount) {
-        tvAmount.setText(String.format("%,d đ", amount));
+        tvAmount.setText(String.format("%d đ", amount));
     }
 
     @Override

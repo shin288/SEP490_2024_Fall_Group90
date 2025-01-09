@@ -9,6 +9,7 @@ public class SendViewModel extends ViewModel {
     private final MutableLiveData<Integer> amount = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> userId = new MutableLiveData<>();
 
+
     public LiveData<Integer> getAmount() {
         return amount;
     }
@@ -23,6 +24,16 @@ public class SendViewModel extends ViewModel {
 
     public void setUserId(int id) {
         userId.setValue(id);
+    }
+
+    private MutableLiveData<Integer> userBalance = new MutableLiveData<>();
+
+    public LiveData<Integer> getUserBalance() {
+        return userBalance;
+    }
+
+    public void setUserBalance(int balance) {
+        userBalance.setValue(balance);
     }
 
     // LiveData kiểm tra số tiền hợp lệ

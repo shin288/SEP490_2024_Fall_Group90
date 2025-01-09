@@ -15,7 +15,16 @@
         android:theme="@style/Theme.FTOPApplication"
         tools:targetApi="31">
         <activity
-            android:name=".WithDrawActivity"
+            android:name=".ui.withdraw.WithDrawSuccess"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.withdraw.WithDrawActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

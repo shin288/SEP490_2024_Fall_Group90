@@ -26,6 +26,19 @@ public class SelectContactViewModel extends ViewModel {
     private final TransactionRepository transactionRepository = new TransactionRepository();
     private final UserRepository userRepository = new UserRepository();
 
+
+        private MutableLiveData<Integer> balance = new MutableLiveData<>();
+
+        public LiveData<Integer> getBalance() {
+            return balance;
+        }
+
+        public void setBalance(int balanceValue) {
+            balance.setValue(balanceValue);
+        }
+
+
+
     public LiveData<Integer> getSenderUserId() {
         return senderUserId;
     }
@@ -102,6 +115,20 @@ public class SelectContactViewModel extends ViewModel {
             public void onFailure(Call<Transaction> call, Throwable t) {
                 transferSuccess.setValue(false);
                 errorMessage.setValue("Error: " + t.getMessage());
+            }
+        });
+    }
+
+    public void fetchFilteredUsers() {
+        userRepository.getFilteredUsers(new UserRepository.UserCallback() {
+            @Override
+            public void onSuccess(List<User> filteredUsers) {
+                users.setValue(filteredUsers);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                errorMessage.setValue(throwable.getMessage());
             }
         });
     }

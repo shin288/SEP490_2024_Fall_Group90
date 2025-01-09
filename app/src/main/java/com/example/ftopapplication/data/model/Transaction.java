@@ -1,8 +1,11 @@
 package com.example.ftopapplication.data.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Date;
 
 public class Transaction {
+
     private int transactionId;
     private int transferUserId;  // ID người gửi (sửa từ User senderId)
     private int receiveUserId;   // ID người nhận (sửa từ User receiverId)

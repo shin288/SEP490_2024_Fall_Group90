@@ -83,35 +83,45 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
 
         // Gán view trong dialog
         ImageView qrCodeImage = dialog.findViewById(R.id.qrCodeImage);
+        Button btnOkPopup = dialog.findViewById(R.id.btnOkPopup);
         Button btnClosePopup = dialog.findViewById(R.id.btnClosePopup);
 
         // Sử dụng ZXing để tạo mã QR
         try {
-            // Định cấu hình mã QR
             int size = 500; // Kích thước mã QR
             BitMatrix bitMatrix = new MultiFormatWriter().encode(
                     qrCodeContent, BarcodeFormat.QR_CODE, size, size);
 
-            // Chuyển đổi BitMatrix thành Bitmap
             Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565);
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
                     bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
                 }
             }
-
-            // Hiển thị mã QR trong ImageView
-            qrCodeImage.setImageBitmap(bitmap);
+            qrCodeImage.setImageBitmap(bitmap); // Hiển thị mã QR trong ImageView
         } catch (WriterException e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to generate QR Code", Toast.LENGTH_SHORT).show();
         }
 
-        // Đóng dialog khi nhấn "Close"
-        btnClosePopup.setOnClickListener(v -> dialog.dismiss());
+        // Xử lý nút "OK"
+        btnOkPopup.setOnClickListener(v -> {
+            dialog.dismiss();
+            // Chuyển sang màn hình TopUpSuccessActivity
+            Intent intent = new Intent(TopUpActivity.this, TopUpSuccessActivity.class);
+            startActivity(intent);
+            finish(); // Đóng TopUpActivity
+        });
+
+        // Xử lý nút "Close"
+        btnClosePopup.setOnClickListener(v -> {
+            dialog.dismiss();
+            Toast.makeText(TopUpActivity.this, "Top Up Cancelled", Toast.LENGTH_SHORT).show();
+        });
 
         dialog.show();
     }
+
 
 
     @Override

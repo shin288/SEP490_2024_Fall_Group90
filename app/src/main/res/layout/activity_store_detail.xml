@@ -128,13 +128,10 @@
             <!-- Nút thanh toán -->
             <Button
                 android:id="@+id/btn_checkout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                style="@style/CheckoutButtonStyle"
                 android:text="Check out"
 
-                android:layout_marginTop="16dp"
-                android:backgroundTint="@color/blue_background"
-                android:textColor="@android:color/white" />
+                android:layout_marginTop="16dp" />
         </LinearLayout>
 
     </FrameLayout>

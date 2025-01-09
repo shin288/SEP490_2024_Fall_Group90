@@ -9,7 +9,9 @@ import com.example.ftopapplication.data.model.TransactionSummary;
 import com.example.ftopapplication.data.model.User;
 import com.example.ftopapplication.network.ApiClient;
 import com.example.ftopapplication.network.ApiService;
+import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -47,6 +49,14 @@ public class TransactionRepository {
             public void onResponse(Call<ApiResponse<OrderTransactionResponse>> call, Response<ApiResponse<OrderTransactionResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body());
+                } else if (response.errorBody() != null) {
+                    try {
+                        String error = response.errorBody().string();
+                        ApiResponse errorResponse = new Gson().fromJson(error, ApiResponse.class);
+                        callback.onError(new Throwable(errorResponse.getMessage()));
+                    } catch (IOException e) {
+                        callback.onError(new Throwable("Failed to process transaction."));
+                    }
                 } else {
                     callback.onError(new Throwable("Failed to process transaction: " + response.message()));
                 }
@@ -58,6 +68,7 @@ public class TransactionRepository {
             }
         });
     }
+
 
     public void fetchTransactions(int userId, TransactionCallback callback) {
         apiService.getAllTransactionsForUser(userId).enqueue(new Callback<List<Transaction>>() {
@@ -113,6 +124,27 @@ public class TransactionRepository {
         });
     }
 
+    public void transferMoneySingle(Transaction transaction, SingleTransactionCallback callback) {
+        apiService.transferMoney(transaction).enqueue(new Callback<Transaction>() {
+            @Override
+            public void onResponse(Call<Transaction> call, Response<Transaction> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body()); // Gửi đối tượng Transaction đến callback
+                } else if (response.code() == 400) {
+                    callback.onError(new Throwable("Insufficient balance"));
+                } else {
+                    callback.onError(new Throwable("Transfer failed: " + response.message()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Transaction> call, Throwable t) {
+                callback.onError(t);
+            }
+        });
+    }
+
+
     public interface TransactionSummaryCallback {
         void onSuccess(TransactionSummary summary);
         void onError(Throwable throwable);
@@ -135,7 +167,9 @@ public class TransactionRepository {
         void onError(Throwable throwable);
     }
 
-
-
+    public interface SingleTransactionCallback {
+        void onSuccess(Transaction transaction);
+        void onError(Throwable throwable);
+    }
 
 }

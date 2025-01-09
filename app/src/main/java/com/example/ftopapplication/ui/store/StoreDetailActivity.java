@@ -258,6 +258,7 @@ public class StoreDetailActivity extends AppCompatActivity {
                     // Truyền dữ liệu qua PinEntryActivity
                     Intent intent = new Intent(StoreDetailActivity.this, PinEntryActivity.class);
                     intent.putExtra("orderRequest", request); // Truyền Parcelable object
+
                     intent.putExtra("amount", totalPrice); // Tổng giá tiền
                     intent.putExtra("receiver_id", receiverId); // ID của người nhận
                     intent.putExtra("store_name", collapsingToolbar.getTitle().toString()); // Tên cửa hàng

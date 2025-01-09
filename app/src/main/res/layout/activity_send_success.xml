@@ -157,6 +157,8 @@
                 android:backgroundTint="#4CAF50"
                 android:text="Done"
                 android:textColor="#FFFFFF"
+                android:textSize="25dp"
+                android:gravity="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />

@@ -6,22 +6,13 @@
     android:background="#FFA500">
 
     <!-- Success Icon -->
-    <ImageView
-        android:id="@+id/success_icon"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:src="@drawable/ic_success"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="60dp" />
 
     <!-- Success Text -->
     <TextView
         android:id="@+id/success_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Top Up Success"
+        android:text="Request Top Up Success"
         android:textSize="20sp"
         android:textColor="#FFFFFF"
         android:layout_marginTop="16dp"

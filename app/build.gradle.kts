@@ -52,6 +52,8 @@ dependencies {
     implementation ("com.auth0.android:jwtdecode:2.0.0")
     implementation ("com.github.Spikeysanju:MotionToast:1.4")
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation ("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+
 
 
 

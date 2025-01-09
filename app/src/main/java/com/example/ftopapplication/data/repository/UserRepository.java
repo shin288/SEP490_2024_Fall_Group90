@@ -7,8 +7,10 @@ import com.example.ftopapplication.network.ApiService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
+import retrofit2.Response;
 
 public class UserRepository {
 
@@ -49,6 +51,35 @@ public class UserRepository {
     public Call<Void> registerUserWithPayload(Map<String, Object> userPayload) {
         return apiService.registerUserWithPayload(userPayload);
     }
+
+    public void getFilteredUsers(UserCallback callback) {
+        apiService.getUsers().enqueue(new retrofit2.Callback<List<User>>() {
+            @Override
+            public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // Lọc những user có đủ thông tin
+                    List<User> filteredUsers = response.body().stream()
+                            .filter(user -> user.getDisplayName() != null && !user.getDisplayName().isEmpty() &&
+                                    user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty())
+                            .collect(Collectors.toList());
+                    callback.onSuccess(filteredUsers);
+                } else {
+                    callback.onError(new Throwable("Failed to fetch users"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<User>> call, Throwable t) {
+                callback.onError(t);
+            }
+        });
+    }
+
+    public interface UserCallback {
+        void onSuccess(List<User> users);
+        void onError(Throwable throwable);
+    }
+
 
 
 }

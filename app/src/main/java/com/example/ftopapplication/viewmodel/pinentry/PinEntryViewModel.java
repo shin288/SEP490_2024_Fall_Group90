@@ -8,7 +8,14 @@ import com.example.ftopapplication.data.model.ApiResponse;
 import com.example.ftopapplication.data.model.OrderTransactionRequest;
 import com.example.ftopapplication.data.model.OrderTransactionResponse;
 import com.example.ftopapplication.data.model.Transaction;
+import com.example.ftopapplication.data.model.User;
 import com.example.ftopapplication.data.repository.TransactionRepository;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PinEntryViewModel extends ViewModel {
     private final TransactionRepository transactionRepository;
@@ -38,43 +45,57 @@ public class PinEntryViewModel extends ViewModel {
         return errorMessage;
     }
 
-    // Gọi API placeOrderWithTransaction
-    public void placeOrder(OrderTransactionRequest request) {
+    public void verifyPin(int userId, int  enteredPin, TransactionRepository.UserCallback callback) {
         isLoading.setValue(true);
-        transactionRepository.placeOrderWithTransaction(request, new TransactionRepository.OrderTransactionCallback() {
+        transactionRepository.fetchUser(userId, new TransactionRepository.UserCallback() {
             @Override
-            public void onSuccess(ApiResponse<OrderTransactionResponse> response) {
+            public void onSuccess(User user) {
                 isLoading.setValue(false);
-                orderResponseLiveData.setValue(response);
+                if (user.getPin() == (enteredPin)) {
+                    callback.onSuccess(user);
+                } else {
+                    callback.onError(new Throwable("Incorrect PIN"));
+                }
             }
 
             @Override
             public void onError(Throwable throwable) {
                 isLoading.setValue(false);
-                errorMessage.setValue("Failed to process the order: " + throwable.getMessage());
+                callback.onError(throwable);
             }
         });
     }
 
-    // Gọi API transferMoney
-    public void transferMoney(Transaction transaction) {
+    public void placeOrder(OrderTransactionRequest request, TransactionRepository.OrderTransactionCallback callback) {
         isLoading.setValue(true);
-        transactionRepository.transferMoney(transaction).enqueue(new retrofit2.Callback<Transaction>() {
+        transactionRepository.placeOrderWithTransaction(request, new TransactionRepository.OrderTransactionCallback() {
             @Override
-            public void onResponse(retrofit2.Call<Transaction> call, retrofit2.Response<Transaction> response) {
+            public void onSuccess(ApiResponse<OrderTransactionResponse> response) {
                 isLoading.setValue(false);
-                if (response.isSuccessful()) {
-                    transferResponseLiveData.setValue(response.body());
-                } else {
-                    errorMessage.setValue("Transfer failed: " + response.message());
-                }
+                callback.onSuccess(response);
             }
 
             @Override
-            public void onFailure(retrofit2.Call<Transaction> call, Throwable t) {
+            public void onError(Throwable throwable) {
                 isLoading.setValue(false);
-                errorMessage.setValue("Network error: " + t.getMessage());
+                callback.onError(throwable);
             }
         });
     }
+
+    public void transferMoney(int senderUserId, int receiverUserId, int amount, TransactionRepository.SingleTransactionCallback callback) {
+        Transaction transaction = new Transaction();
+        transaction.setTransferUserId(senderUserId);
+        transaction.setReceiveUserId(receiverUserId);
+        transaction.setTransactionAmount(amount);
+        transaction.setTransactionDescription("Transfer via app");
+        transaction.setStatus(true);
+
+        transactionRepository.transferMoneySingle(transaction, callback);
+    }
+
+
+
+
+
 }

@@ -71,10 +71,13 @@
         <item name="android:background">@drawable/rounded_button_purple_background</item>
     </style>
 
-
-
-
-
-
-
+    <style name="CheckoutButtonStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:backgroundTint">@color/blue_background</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

@@ -5,6 +5,50 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WithDrawActivity">
+    tools:context=".ui.withdraw.WithDrawActivity">
 
+    <!-- Bank Name -->
+    <EditText
+        android:id="@+id/et_bank_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Bank Name"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Account Number -->
+    <EditText
+        android:id="@+id/et_account_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Account Number"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@id/et_bank_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Amount -->
+    <EditText
+        android:id="@+id/et_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Amount"
+        android:inputType="numberDecimal"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@id/et_account_number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Submit Button -->
+    <Button
+        android:id="@+id/btn_withdraw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Withdraw"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@id/et_amount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -49,15 +49,17 @@
 
         <Button
             android:id="@+id/btn_all"
-            android:layout_width="wrap_content"
+            android:layout_width="120dp"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_button_background"
-            android:text="All"
+            android:text="All Transaction"
             android:textColor="#FFA500" />
 
         <Button
             android:id="@+id/btn_income"
-            android:layout_width="wrap_content"
+            android:layout_width="80sp"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_button_background_disabled"
             android:text="Income"
@@ -66,7 +68,8 @@
 
         <Button
             android:id="@+id/btn_expense"
-            android:layout_width="wrap_content"
+            android:layout_width="80sp"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_button_background_disabled"
             android:text="Expense"

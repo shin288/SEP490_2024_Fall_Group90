@@ -2,6 +2,7 @@ package com.example.ftopapplication.network;
 
 import com.example.ftopapplication.TokenResponse;
 import com.example.ftopapplication.data.model.ApiResponse;
+import com.example.ftopapplication.data.model.BankTransfer;
 import com.example.ftopapplication.data.model.OrderTransactionRequest;
 import com.example.ftopapplication.data.model.OrderTransactionResponse;
 import com.example.ftopapplication.data.model.Product;
@@ -60,7 +61,7 @@ public interface ApiService {
     @POST("api/transaction/transfer")
     Call<Transaction> transferMoney(@Body Transaction transaction);
 
-    @GET("/api/transaction/all-transactions/{userId}")
+    @GET("/api/transaction/searchAll/{userId}")
     Call<List<Transaction>> getAllTransactionsForUser(@Path("userId") int userId);
 
     @GET("/api/transaction/summary/{userId}")
@@ -96,5 +97,7 @@ public interface ApiService {
     @POST("/api/payos/topup")
     Call<TopUpResponse> topUp(@Body TopUpRequest request);
 
+    @POST("api/transaction/withdraw")
+    Call<BankTransfer> withdraw(@Body BankTransfer bankTransfer);
 
 }

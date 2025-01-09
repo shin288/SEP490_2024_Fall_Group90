@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Scan this QR Code to Top Up"
-        android:textSize="24sp"
+        android:textSize="18sp"
         android:textColor="@color/black"
         android:layout_gravity="center"
         android:paddingBottom="16dp" />
@@ -23,12 +23,31 @@
         android:contentDescription="QR Code"
         android:layout_gravity="center" />
 
-    <Button
-        android:id="@+id/btnClosePopup"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Close"
-        android:textSize="24sp"
-        android:layout_marginTop="16dp"
-        android:layout_gravity="center" />
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btnOkPopup"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="OK"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="@color/blue_background"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btnClosePopup"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Close"
+            android:backgroundTint="@color/red"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
 </LinearLayout>

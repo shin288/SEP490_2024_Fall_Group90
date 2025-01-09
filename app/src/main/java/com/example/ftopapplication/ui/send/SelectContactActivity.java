@@ -42,13 +42,15 @@ public class SelectContactActivity extends AppCompatActivity {
         userList = findViewById(R.id.contact_list);
 
         // Get data from Intent
-        int senderUserId = getIntent().getIntExtra("userId", -1);
+        int senderUserId = getIntent().getIntExtra("user_id", -1);
         int amount = getIntent().getIntExtra("amount", 0);
+        int balance = getIntent().getIntExtra("balance", 0); // Nhận số dư ví
         selectContactViewModel.setSenderUserId(senderUserId);
         selectContactViewModel.setAmount(amount);
+        selectContactViewModel.setBalance(balance);
 
         // Observe data
-        selectContactViewModel.getAmount().observe(this, value -> tvAmount.setText(String.format("%,d đ", value)));
+        selectContactViewModel.getAmount().observe(this, value -> tvAmount.setText(String.format("%d đ", value)));
         selectContactViewModel.getTransferSuccess().observe(this, success -> {
             if (success) {
                 Toast.makeText(this, "Transfer successful!", Toast.LENGTH_SHORT).show();
@@ -64,15 +66,27 @@ public class SelectContactActivity extends AppCompatActivity {
         // Setup RecyclerView
         setupUserList();
 
-        // Handle Send button
         btnSend.setOnClickListener(v -> {
             int receiverId = selectContactViewModel.getSelectedContactId().getValue();
-            if (senderUserId == receiverId) {
-                Toast.makeText(this, "You cannot send money to yourself", Toast.LENGTH_SHORT).show();
-            } else {
-                selectContactViewModel.performTransfer(senderUserId, receiverId, amount);
+
+
+            if (balance <= 0) {
+                Toast.makeText(this, "Your wallet balance is insufficient. Please top up!", Toast.LENGTH_SHORT).show();
+                return;
             }
+            if (balance < amount) {
+                Toast.makeText(this, "Your wallet balance is less than the transfer amount. Please top up!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (selectContactViewModel.getSenderUserId().getValue() == receiverId) {
+                Toast.makeText(this, "You cannot send money to yourself", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Thực hiện chuyển tiền nếu mọi điều kiện hợp lệ
+            selectContactViewModel.performTransfer(senderUserId, receiverId, amount);
         });
+
     }
 
     private void setupUserList() {
@@ -80,22 +94,31 @@ public class SelectContactActivity extends AppCompatActivity {
         userList.setLayoutManager(new LinearLayoutManager(this));
         userList.setAdapter(userAdapter);
 
-        // Observe user list
-        selectContactViewModel.fetchUsers();
+        // Fetch and observe filtered users
+        selectContactViewModel.fetchFilteredUsers();
         selectContactViewModel.getUsers().observe(this, users -> {
             userAdapter.updateData(users);
             userAdapter.setOnUserClickListener(user -> {
                 selectContactViewModel.setSelectedContactId(user.getId());
-                btnSend.setEnabled(true);
+                btnSend.setEnabled(true); // Bật nút Send khi chọn user
             });
         });
+
+        // Observe error messages
+        selectContactViewModel.getErrorMessage().observe(this, error -> {
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 
     private void navigateToPinEntry() {
         Intent intent = new Intent(this, PinEntryActivity.class);
         intent.putExtra("transfer_user_id", selectContactViewModel.getSenderUserId().getValue());
         intent.putExtra("receiver_user_id", selectContactViewModel.getSelectedContactId().getValue());
         intent.putExtra("amount", selectContactViewModel.getAmount().getValue());
+        intent.putExtra("is_transfer", true); // Đánh dấu đây là giao dịch chuyển tiền
         startActivity(intent);
     }
 }

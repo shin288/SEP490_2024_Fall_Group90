@@ -119,10 +119,9 @@
 
     <Button
         android:id="@+id/btn_send"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+
         android:layout_margin="16dp"
-        android:background="@drawable/button_background_disabled"
+        style="@style/ContinueButtonStyle"
         android:text="Send"
         android:textColor="#FFFFFF"
         android:enabled="false"

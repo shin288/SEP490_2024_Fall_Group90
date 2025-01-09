@@ -23,6 +23,7 @@ import com.example.ftopapplication.ui.send.SendActivity;
 import com.example.ftopapplication.ui.store.StoreDetailActivity;
 import com.example.ftopapplication.ui.topup.TopUpActivity;
 import com.example.ftopapplication.ui.transaction.StaticActivity;
+import com.example.ftopapplication.ui.withdraw.WithDrawActivity;
 import com.example.ftopapplication.viewmodel.home.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -155,10 +156,17 @@ public class HomeActivity extends AppCompatActivity {
         ImageView btnSend = findViewById(R.id.btn_send);
         if (btnSend != null) {
             btnSend.setOnClickListener(v -> {
-                Intent intent = new Intent(HomeActivity.this, SendActivity.class);
                 int userId = getIntent().getIntExtra("user_id", -1);
-                intent.putExtra("user_id", userId);
-                startActivity(intent);
+
+                viewModel.getUserLiveData().observe(this, user -> {
+                    if (user != null) {
+                        int balance = user.getWalletBalance(); // Lấy số dư ví từ LiveData
+                        Intent intent = new Intent(HomeActivity.this, SendActivity.class);
+                        intent.putExtra("user_id", userId);
+                        intent.putExtra("balance", balance); // Truyền balance
+                        startActivity(intent);
+                    }
+            });
             });
         } else {
             Log.e("HomeActivity", "btn_send not exist in layout");
@@ -166,8 +174,8 @@ public class HomeActivity extends AppCompatActivity {
 
         ImageView btnRequest = findViewById(R.id.btn_request);
         if (btnRequest != null) {
-            btnSend.setOnClickListener(v -> {
-                Intent intent = new Intent(HomeActivity.this, SendActivity.class);
+            btnRequest.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, WithDrawActivity.class);
                 int userId = getIntent().getIntExtra("user_id", -1);
                 intent.putExtra("user_id", userId);
                 startActivity(intent);
