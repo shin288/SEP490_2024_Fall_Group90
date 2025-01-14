@@ -98,7 +98,14 @@ public interface ApiService {
     @POST("/api/payos/topup")
     Call<TopUpResponse> topUp(@Body TopUpRequest request);
 
-    @POST("api/transaction/withdraw")
+    @POST("/api/payos/withdraw")
     Call<BankTransfer> withdraw(@Body BankTransfer bankTransfer);
+
+    @GET("api/user/searchapp")
+    Call<List<User>> searchUsers(@Query("query") String query);
+
+    @GET("/api/payos/transactions")
+    Call<List<BankTransfer>> getAllBankTransfers();
+
 
 }

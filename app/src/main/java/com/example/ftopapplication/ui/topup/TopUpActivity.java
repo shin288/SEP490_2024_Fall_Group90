@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
@@ -21,6 +22,9 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+
+import www.sanju.motiontoast.MotionToast;
+import www.sanju.motiontoast.MotionToastStyle;
 
 public class TopUpActivity extends AppCompatActivity implements NumberPadFragment.OnNumberPadClickListener {
 
@@ -41,7 +45,7 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
 
         int walletUserId = getIntent().getIntExtra("user_id", -1);
         if (walletUserId == -1) {
-            Toast.makeText(this, "Invalid user. Please log in again.", Toast.LENGTH_SHORT).show();
+            showMotionToast("Error", "Invalid user. Please log in again.", MotionToastStyle.ERROR);
             return;
         }
 
@@ -52,31 +56,31 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
                 if (amount > 0) {
                     viewModel.topUp(walletUserId, amount);
                 } else {
-                    Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show();
+                    showMotionToast("Warning", "Please enter a valid amount", MotionToastStyle.WARNING);
                 }
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Invalid amount format", Toast.LENGTH_SHORT).show();
+            }catch (NumberFormatException e) {
+                showMotionToast("Error", "Invalid amount format", MotionToastStyle.ERROR);
             }
         });
 
-        observeViewModel();
+        observeViewModel(walletUserId);
     }
 
-    private void observeViewModel() {
+    private void observeViewModel(int userId) {
         viewModel.getQrCodeLiveData().observe(this, qrCode -> {
             if (qrCode != null) {
-                showQrCodeDialog(qrCode); // Hiển thị mã QR trong popup
+                showQrCodeDialog(qrCode,userId); // Hiển thị mã QR trong popup
             }
         });
 
         viewModel.getErrorLiveData().observe(this, error -> {
             if (error != null) {
-                Toast.makeText(this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                showMotionToast("Error", error, MotionToastStyle.ERROR);
             }
         });
     }
 
-    private void showQrCodeDialog(String qrCodeContent) {
+    private void showQrCodeDialog(String qrCodeContent, int userId) {
         // Tạo dialog
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_top_up_qr_popup);
@@ -101,22 +105,24 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
             qrCodeImage.setImageBitmap(bitmap); // Hiển thị mã QR trong ImageView
         } catch (WriterException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Failed to generate QR Code", Toast.LENGTH_SHORT).show();
+            showMotionToast("Error", "Failed to generate QR Code", MotionToastStyle.ERROR);
         }
 
         // Xử lý nút "OK"
         btnOkPopup.setOnClickListener(v -> {
             dialog.dismiss();
-            // Chuyển sang màn hình TopUpSuccessActivity
+            String amount = amountText.getText().toString();
             Intent intent = new Intent(TopUpActivity.this, TopUpSuccessActivity.class);
+            intent.putExtra("user_id", userId);
+            intent.putExtra("amount", amount);
             startActivity(intent);
-            finish(); // Đóng TopUpActivity
+            finish();
         });
 
         // Xử lý nút "Close"
         btnClosePopup.setOnClickListener(v -> {
             dialog.dismiss();
-            Toast.makeText(TopUpActivity.this, "Top Up Cancelled", Toast.LENGTH_SHORT).show();
+            showMotionToast("Cancelled", "Top Up Cancelled", MotionToastStyle.INFO);
         });
 
         dialog.show();
@@ -157,6 +163,16 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
                 amountText.setText("0 đ"); // Lỗi định dạng -> hiển thị 0 đ
             }
         }
+    }
+
+    private void showMotionToast(String title, String message, MotionToastStyle style) {
+        MotionToast.Companion.darkColorToast(this,
+                title,
+                message,
+                style,
+                MotionToast.GRAVITY_BOTTOM,
+                MotionToast.LONG_DURATION,
+                ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
     }
 
 }

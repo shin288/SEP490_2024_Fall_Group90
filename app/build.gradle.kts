@@ -54,5 +54,6 @@ dependencies {
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation ("com.fasterxml.jackson.core:jackson-databind:2.15.2")
     implementation ("com.airbnb.android:lottie:5.2.0")
+    implementation ("com.android.volley:volley:1.2.1")
 
 }

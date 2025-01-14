@@ -53,14 +53,18 @@ public class StaticActivity extends AppCompatActivity {
         expenseTextView = findViewById(R.id.expense_text);
         currentBalanceTextView = findViewById(R.id.current_balance);
 
+
+
         int userId = getIntent().getIntExtra("user_id", -1);
         // Initialize components
+        viewModel = new ViewModelProvider(this).get(StaticViewModel.class);
+        viewModel.fetchUserWalletBalance(userId);
+
         moneyTrackerChart = findViewById(R.id.money_tracker_chart);
         transactionHistoryContainer = findViewById(R.id.transaction_history_container);
         seeAllTransactionButton = findViewById(R.id.btn_see_all_transactions);
 
-        viewModel = new ViewModelProvider(this).get(StaticViewModel.class);
-        viewModel.fetchUserWalletBalance(userId);
+
         setupObservers();
 
         // Fetch all transactions for the user
@@ -138,10 +142,7 @@ public class StaticActivity extends AppCompatActivity {
                 // Đã ở StaticActivity, không cần làm gì
                 return true;
 
-            } else if (itemId == R.id.menu_pay) {
-                // Hiển thị thông báo cho mục Pay (hoặc điều hướng nếu có màn hình riêng)
-                Toast.makeText(this, "Pay clicked", Toast.LENGTH_SHORT).show();
-                return true;
+
 
             } else if (itemId == R.id.menu_message) {
                 // Hiển thị thông báo cho mục Message
@@ -187,11 +188,12 @@ public class StaticActivity extends AppCompatActivity {
         float[] dailyIncome = new float[7];
         float[] dailyExpense = new float[7];
 
+        int userId = getIntent().getIntExtra("user_id", -1);
         for (Transaction transaction : transactions) {
             int dayOfWeek = getDayOfWeek(transaction.getTransactionDate()); // Convert date to day of week
-            if (transaction.getReceiveUserId() == getIntent().getIntExtra("user_id", -1)) {
+            if (transaction.getReceiveUserId() == userId && transaction.isStatus()) {
                 dailyIncome[dayOfWeek] += transaction.getTransactionAmount();
-            } else if (transaction.getTransferUserId() == getIntent().getIntExtra("user_id", -1)) {
+            } else if (transaction.getTransferUserId() == userId && transaction.isStatus()) {
                 dailyExpense[dayOfWeek] += transaction.getTransactionAmount();
             }
         }
@@ -202,16 +204,16 @@ public class StaticActivity extends AppCompatActivity {
         }
 
         BarDataSet incomeDataSet = new BarDataSet(incomeEntries, "Income");
-        incomeDataSet.setColor(Color.parseColor("#00BFFF"));
+        incomeDataSet.setColor(Color.GREEN);
 
         BarDataSet expenseDataSet = new BarDataSet(expenseEntries, "Expense");
-        expenseDataSet.setColor(Color.parseColor("#FF4500"));
+        expenseDataSet.setColor(Color.RED);
 
         BarData barData = new BarData(incomeDataSet, expenseDataSet);
-        barData.setBarWidth(0.4f);
+        barData.setBarWidth(0.3f);
 
         moneyTrackerChart.setData(barData);
-        moneyTrackerChart.groupBars(-0.5f, 0.2f, 0.02f);
+        moneyTrackerChart.groupBars(0f, 0.2f, 0.02f);
         moneyTrackerChart.getDescription().setEnabled(false);
         moneyTrackerChart.invalidate();
     }

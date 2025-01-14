@@ -1,5 +1,6 @@
 package com.example.ftopapplication.ui.signup;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +12,7 @@ import com.example.ftopapplication.data.model.User;
 import com.example.ftopapplication.data.repository.UserRepository;
 import com.example.ftopapplication.ui.shared.fragment.NumberPadFragment;
 import com.example.ftopapplication.ui.shared.fragment.PinNumberPadFragment;
+import com.example.ftopapplication.ui.signin.SignInActivity;
 import com.example.ftopapplication.viewmodel.signup.SignUpViewModel;
 import com.example.ftopapplication.viewmodel.signup.SignUpViewModelFactory;
 
@@ -85,8 +87,17 @@ public class ConfirmPinActivity extends AppCompatActivity implements PinNumberPa
     private void confirmPin() {
         if (enteredPin.toString().equals(newPin)) {
             if (enteredPin.length() == 6) {
-                user.setPin(Integer.parseInt(newPin)); // Gán mã PIN vào User
-                sendUserToAPI(user);
+                int pinValue;
+
+                // Xử lý đặc biệt cho trường hợp "000000"
+                if (newPin.equals("000000")) {
+                    pinValue = 0;
+                } else {
+                    pinValue = Integer.parseInt(newPin);
+                }
+
+                user.setPin(pinValue);  // Vẫn lưu PIN dưới dạng int
+                sendUserToAPI(user,newPin);
             } else {
                 MotionToast.Companion.darkColorToast(this,
                         "Error",
@@ -109,7 +120,7 @@ public class ConfirmPinActivity extends AppCompatActivity implements PinNumberPa
         }
     }
 
-    private void sendUserToAPI(User user) {
+    private void sendUserToAPI(User user,String pinString) {
 
         // Chuyển int pin thành String trước khi gửi
         Map<String, Object> userPayload = new HashMap<>();
@@ -120,7 +131,7 @@ public class ConfirmPinActivity extends AppCompatActivity implements PinNumberPa
         userPayload.put("isActive", user.isActive());
         userPayload.put("password", user.getPassword());
         userPayload.put("phoneNumber", user.getPhoneNumber());
-        userPayload.put("pin", String.valueOf(user.getPin())); // Chuyển pin thành String
+        userPayload.put("pin", pinString);
         userPayload.put("walletBalance", user.getWalletBalance());
 
         signUpViewModel.registerUserWithPayload(userPayload);
@@ -134,8 +145,12 @@ public class ConfirmPinActivity extends AppCompatActivity implements PinNumberPa
                         MotionToast.GRAVITY_BOTTOM,
                         MotionToast.LONG_DURATION,
                         ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
+                Intent intent = new Intent(ConfirmPinActivity.this, SignInActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
                 finish();
             }
+
         });
 
         signUpViewModel.getErrorMessage().observe(this, error -> {

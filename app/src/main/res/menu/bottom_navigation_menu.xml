@@ -8,12 +8,7 @@
         android:id="@+id/menu_cashflow"
         android:icon="@drawable/ic_cashflow"
         android:title="Cashflow" />
-    <item
-        android:id="@+id/menu_pay"
 
-        android:icon="@drawable/ic_pay"
-        android:title="Pay"
-        />
     <item
         android:id="@+id/menu_message"
         android:icon="@drawable/ic_message"

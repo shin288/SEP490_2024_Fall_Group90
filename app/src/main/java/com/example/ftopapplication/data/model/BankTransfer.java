@@ -5,11 +5,11 @@ public class BankTransfer {
     private int walletUserId;
     private String accountNumber;
     private String bankName;
-    private int transferType; // 1 = Deposit, 2 = Withdraw
+    private int transferType; // 1 = Deposit, 0 = Withdraw
     private String transferDescription;
     private String transferDate;
     private boolean status;
-    private int transferAmount;
+    private int amount;
 
     // Getters and Setters
     public int getTransferId() {
@@ -76,11 +76,11 @@ public class BankTransfer {
         this.status = status;
     }
 
-    public int getTransferAmount() {
-        return transferAmount;
+    public int getAmount() {
+        return amount;
     }
 
-    public void setTransferAmount(int transferAmount) {
-        this.transferAmount = transferAmount;
+    public void setAmount(int amount) {
+        this.amount = amount;
     }
 }

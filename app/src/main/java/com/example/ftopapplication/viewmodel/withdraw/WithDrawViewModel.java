@@ -57,9 +57,9 @@ public class WithDrawViewModel extends ViewModel {
         bankTransfer.setWalletUserId(userId);
         bankTransfer.setBankName(bankName.getValue());
         bankTransfer.setAccountNumber(accountNumber.getValue());
-        bankTransfer.setTransferAmount(amount.getValue());
+        bankTransfer.setAmount(amount.getValue());
         bankTransfer.setTransferType(0); // Type 0 for withdrawal
-        bankTransfer.setTransferDescription("User withdrawal");
+
 
         bankTransferRepository.withdraw(bankTransfer).enqueue(new Callback<BankTransfer>() {
             @Override

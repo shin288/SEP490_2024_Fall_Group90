@@ -30,15 +30,11 @@ public class UserRepository {
         return apiService.getUserById(userId);
     }
 
-    // API để tìm kiếm người dùng theo tên
-    public Call<List<User>> searchUsersByName(String name) {
-        return apiService.searchUsersByName(name);
+    // Gọi API tìm kiếm người dùng
+    public Call<List<User>> searchUsers(String query) {
+        return apiService.searchUsers(query);
     }
 
-    // API để tìm kiếm người dùng theo số điện thoại
-    public Call<User> searchUserByPhoneNumber(String phoneNumber) {
-        return apiService.searchUserByPhoneNumber(phoneNumber);
-    }
 
     public Call<TokenResponse> loginUser(String emailOrPhone, String password) {
         return apiService.loginUser(emailOrPhone, password);

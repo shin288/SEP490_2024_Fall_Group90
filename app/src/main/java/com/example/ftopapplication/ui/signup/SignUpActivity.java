@@ -2,19 +2,29 @@ package com.example.ftopapplication.ui.signup;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.ftopapplication.R;
 import com.example.ftopapplication.data.model.User;
 import com.example.ftopapplication.data.repository.UserRepository;
 import com.example.ftopapplication.ui.signin.SignInActivity;
 import com.example.ftopapplication.viewmodel.signup.SignUpViewModel;
 import com.example.ftopapplication.viewmodel.signup.SignUpViewModelFactory;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.regex.Pattern;
 
 import www.sanju.motiontoast.MotionToast;
 import www.sanju.motiontoast.MotionToastStyle;
@@ -24,6 +34,7 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText edtName, edtEmail, edtPhone, edtPassword;
     private Button btnSignUp;
     private SignUpViewModel signUpViewModel;
+    private TextView tvSignIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +49,7 @@ public class SignUpActivity extends AppCompatActivity {
         edtPhone = findViewById(R.id.edtPhone);
         edtPassword = findViewById(R.id.edtPassword);
         btnSignUp = findViewById(R.id.btnSignUp);
+        tvSignIn = findViewById(R.id.SignIn);
 
         btnSignUp.setOnClickListener(v -> {
             String name = edtName.getText().toString().trim();
@@ -46,38 +58,57 @@ public class SignUpActivity extends AppCompatActivity {
             String password = edtPassword.getText().toString().trim();
 
             if (name.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
-                MotionToast.Companion.darkColorToast(this,
-                        "Warning",
-                        "Please fill in all required fields!",
-                        MotionToastStyle.WARNING,
-                        MotionToast.GRAVITY_BOTTOM,
-                        MotionToast.LONG_DURATION,
-                        ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
+                showToast("Warning", "Please fill in all required fields!", MotionToastStyle.WARNING);
                 return;
             }
 
-            // Tạo User và chuyển đến SetNewPinActivity
-            User newUser = new User(email, name, phone, password, "https://example.com/avatar1.jpg", true);
-            Intent intent = new Intent(SignUpActivity.this, SetNewPinActivity.class);
-            intent.putExtra("user_data", newUser);
-            startActivity(intent);
-            finish();
+            if (!isValidEmail(email)) {
+                showToast("Invalid Email", "Email must end with @fpt.edu.vn", MotionToastStyle.ERROR);
+                return;
+            }
+
+            if (!isValidPhone(phone)) {
+                showToast("Invalid Phone", "Phone number must be exactly 10 digits.", MotionToastStyle.ERROR);
+                return;
+            }
+
+            if (password.length() < 8) {
+                showToast("Invalid Password", "Password must be at least 8 characters.", MotionToastStyle.ERROR);
+                return;
+            }
+
+            // Kiểm tra trùng email/phone trước khi đăng ký
+            checkDuplicateAndRegister(name, email, phone, password);
         });
 
+        tvSignIn.setOnClickListener(v -> {
+            Intent intent = new Intent(SignUpActivity.this, SignInActivity.class);
+            startActivity(intent);
+        });
+    }
 
+    private boolean isValidEmail(String email) {
+        return email.endsWith("@fpt.edu.vn") && Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    private boolean isValidPhone(String phone) {
+        return phone.matches("\\d{10}");
+    }
+
+    private void showToast(String title, String message, MotionToastStyle style) {
+        MotionToast.Companion.darkColorToast(this,
+                title,
+                message,
+                style,
+                MotionToast.GRAVITY_BOTTOM,
+                MotionToast.LONG_DURATION,
+                ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
     }
 
     private void observeViewModel() {
         signUpViewModel.getSignUpSuccess().observe(this, success -> {
             if (success) {
-                MotionToast.Companion.darkColorToast(this,
-                        "Success",
-                        "Account created successfully!",
-                        MotionToastStyle.SUCCESS,
-                        MotionToast.GRAVITY_BOTTOM,
-                        MotionToast.LONG_DURATION,
-                        ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
-
+                showToast("Success", "Account created successfully!", MotionToastStyle.SUCCESS);
                 Intent intent = new Intent(SignUpActivity.this, SignInActivity.class);
                 startActivity(intent);
                 finish();
@@ -86,14 +117,41 @@ public class SignUpActivity extends AppCompatActivity {
 
         signUpViewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
-                MotionToast.Companion.darkColorToast(this,
-                        "Error",
-                        error,
-                        MotionToastStyle.ERROR,
-                        MotionToast.GRAVITY_BOTTOM,
-                        MotionToast.LONG_DURATION,
-                        ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
+                showToast("Error", error, MotionToastStyle.ERROR);
             }
         });
     }
+
+    private void checkDuplicateAndRegister(String name, String email, String phone, String password) {
+        // Gọi API kiểm tra dữ liệu trùng
+        String url = "http://10.0.2.2:8000/api/user/check-duplicate?email=" + email + "&phone=" + phone;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        boolean exists = response.getBoolean("exists");
+                        if (exists) {
+                            showToast("Error", "Email or Phone number already exists!", MotionToastStyle.ERROR);
+                        } else {
+                            moveToConfirmPinActivity(name, email, phone, password);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        showToast("Error", "Server error. Please try again.", MotionToastStyle.ERROR);
+                    }
+                },
+                error -> showToast("Error", "Failed to connect to server.", MotionToastStyle.ERROR)
+        );
+
+        Volley.newRequestQueue(this).add(request);
+    }
+
+    private void moveToConfirmPinActivity(String name, String email, String phone, String password) {
+        User newUser = new User(email, name, phone, password, "https://example.com/avatar1.jpg", true);
+        Intent intent = new Intent(SignUpActivity.this, SetNewPinActivity.class);
+        intent.putExtra("user_data", newUser);
+        startActivity(intent);
+    }
+
+
 }

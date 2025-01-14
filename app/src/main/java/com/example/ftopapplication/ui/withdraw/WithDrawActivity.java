@@ -72,7 +72,7 @@ public class WithDrawActivity extends AppCompatActivity {
                 return;
             }
 
-            int userId = getIntent().getIntExtra("userId", -1);
+            int userId = getIntent().getIntExtra("user_id", -1);
             if (userId == -1) {
                 Toast.makeText(this, "Invalid user ID", Toast.LENGTH_SHORT).show();
                 return;

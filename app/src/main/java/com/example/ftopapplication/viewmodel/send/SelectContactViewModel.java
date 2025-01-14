@@ -9,6 +9,7 @@ import com.example.ftopapplication.data.model.User;
 import com.example.ftopapplication.data.repository.TransactionRepository;
 import com.example.ftopapplication.data.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.MediaType;
@@ -145,4 +146,27 @@ public class SelectContactViewModel extends ViewModel {
             }
         });
     }
+
+    public LiveData<List<User>> searchUsers(String query) {
+        MutableLiveData<List<User>> searchResult = new MutableLiveData<>();
+
+        userRepository.searchUsers(query).enqueue(new Callback<List<User>>() {
+            @Override
+            public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    searchResult.setValue(response.body());
+                } else {
+                    searchResult.setValue(new ArrayList<>());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<User>> call, Throwable t) {
+                searchResult.setValue(new ArrayList<>());
+            }
+        });
+
+        return searchResult;
+    }
+
 }
