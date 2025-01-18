@@ -96,6 +96,7 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- Bottom Sheet cố định -->
+    <!-- Bottom Sheet cố định -->
     <FrameLayout
         android:id="@+id/bottom_sheet_container"
         android:layout_width="match_parent"
@@ -104,45 +105,84 @@
         android:background="@android:color/white"
         android:elevation="8dp">
 
-        <!-- Nội dung BottomSheet -->
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/detailScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:fillViewport="true">
 
-            <!-- Tổng giá tiền -->
-
-            <com.airbnb.lottie.LottieAnimationView
-                android:id="@+id/lottie_view_detail"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center"
-                app:lottie_autoPlay="true"
-                app:lottie_loop="true"
-                app:lottie_rawRes="@raw/viewdetail" />
-
-            <TextView
-                android:id="@+id/tv_summary_price"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                android:layout_marginEnd="10dp"
-                android:text="Total Price: 0 đ"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                <!-- Tổng giá tiền gốc -->
+                <TextView
+                    android:id="@+id/tv_original_total"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Original Total: 0 đ"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="10dp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:layout_marginTop="8dp" />
 
-            <!-- Nút thanh toán -->
-            <Button
-                android:id="@+id/btn_checkout"
-                style="@style/CheckoutButtonStyle"
-                android:layout_marginTop="16dp"
+                <!-- Voucher Discount -->
+                <TextView
+                    android:id="@+id/tv_voucher_discount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Voucher Discount: 0 đ"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginTop="4dp" />
 
-                android:text="Check out" />
-        </LinearLayout>
+                <!-- Icon View Detail -->
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/lottie_view_detail"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_gravity="center"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    app:lottie_rawRes="@raw/viewdetail" />
+
+                <!-- Tổng giá tiền -->
+                <TextView
+                    android:id="@+id/tv_summary_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="10dp"
+                    android:text="Total Price: 0 đ"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Nút thanh toán -->
+                <Button
+                    android:id="@+id/btn_checkout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textSize="20sp"
+                    android:layout_marginTop="16dp"
+                    android:text="Check out"
+                    android:backgroundTint="@color/blue_border"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
     </FrameLayout>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

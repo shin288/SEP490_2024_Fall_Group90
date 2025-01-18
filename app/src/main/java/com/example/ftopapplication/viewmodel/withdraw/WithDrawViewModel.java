@@ -13,7 +13,7 @@ import retrofit2.Response;
 
 public class WithDrawViewModel extends ViewModel {
     private final MutableLiveData<String> bankName = new MutableLiveData<>();
-    private final MutableLiveData<String> accountNumber = new MutableLiveData<>();
+    private final MutableLiveData<Integer> accountNumber = new MutableLiveData<>();
     private final MutableLiveData<Integer> amount = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isSuccess = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
@@ -28,11 +28,11 @@ public class WithDrawViewModel extends ViewModel {
         bankName.setValue(name);
     }
 
-    public LiveData<String> getAccountNumber() {
+    public LiveData<Integer> getAccountNumber() {
         return accountNumber;
     }
 
-    public void setAccountNumber(String number) {
+    public void setAccountNumber(Integer number) {
         accountNumber.setValue(number);
     }
 
@@ -58,7 +58,7 @@ public class WithDrawViewModel extends ViewModel {
         bankTransfer.setBankName(bankName.getValue());
         bankTransfer.setAccountNumber(accountNumber.getValue());
         bankTransfer.setAmount(amount.getValue());
-        bankTransfer.setTransferType(0); // Type 0 for withdrawal
+        bankTransfer.setTransferType(false); // Type 0 for withdrawal
 
 
         bankTransferRepository.withdraw(bankTransfer).enqueue(new Callback<BankTransfer>() {

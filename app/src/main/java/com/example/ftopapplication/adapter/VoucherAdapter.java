@@ -94,6 +94,8 @@
                     onVoucherSelectedListener.onVoucherSelected(voucher);
                 }
             }
+
+
         }
 
         public Voucher getSelectedVoucher() {

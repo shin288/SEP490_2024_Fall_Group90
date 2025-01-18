@@ -32,6 +32,7 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
     private StringBuilder inputAmount = new StringBuilder("0");
     private Button topUpButton;
     private TopUpViewModel viewModel;
+    private ImageView btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +41,9 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
 
         amountText = findViewById(R.id.tv_amount);
         topUpButton = findViewById(R.id.btn_top_up);
+        btnBack = findViewById(R.id.btn_back);
+
+        btnBack.setOnClickListener(v -> finish());
 
         viewModel = new ViewModelProvider(this).get(TopUpViewModel.class);
 
@@ -49,28 +53,36 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
             return;
         }
 
-        topUpButton.setOnClickListener(v -> {
-            String amountString = amountText.getText().toString().replace("đ", "").replace(",", "").trim();
-            try {
-                int amount = Integer.parseInt(amountString); // Chuyển đổi thành int
-                if (amount > 0) {
-                    viewModel.topUp(walletUserId, amount);
-                } else {
-                    showMotionToast("Warning", "Please enter a valid amount", MotionToastStyle.WARNING);
-                }
-            }catch (NumberFormatException e) {
-                showMotionToast("Error", "Invalid amount format", MotionToastStyle.ERROR);
-            }
-        });
+        topUpButton.setOnClickListener(v -> validateAndTopUp(walletUserId));
 
         observeViewModel(walletUserId);
     }
 
-    private void observeViewModel(int userId) {
-        viewModel.getQrCodeLiveData().observe(this, qrCode -> {
-            if (qrCode != null) {
-                showQrCodeDialog(qrCode,userId); // Hiển thị mã QR trong popup
+    private void validateAndTopUp(int walletUserId) {
+        String amountString = amountText.getText().toString().replace("đ", "").replace(",", "").trim();
+        try {
+            int amount = Integer.parseInt(amountString);
+
+            if (amount < 5000) {
+                showMotionToast("Error", "Số tiền tối thiểu là 5.000 đ", MotionToastStyle.ERROR);
+            } else if (amount > 1000000) {
+                showMotionToast("Error", "Số tiền tối đa là 1.000.000 đ", MotionToastStyle.ERROR);
+            } else {
+                viewModel.topUp(walletUserId, amount);  // Gọi API nạp tiền
             }
+
+        } catch (NumberFormatException e) {
+            showMotionToast("Error", "Định dạng số tiền không hợp lệ", MotionToastStyle.ERROR);
+        }
+    }
+
+    private void observeViewModel(int userId) {
+        viewModel.getTransferIdLiveData().observe(this, transferId -> {
+            viewModel.getQrCodeLiveData().observe(this, qrCode -> {
+                if (qrCode != null) {
+                    showQrCodeDialog(qrCode, userId, transferId);  // Truyền transferId
+                }
+            });
         });
 
         viewModel.getErrorLiveData().observe(this, error -> {
@@ -80,7 +92,7 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
         });
     }
 
-    private void showQrCodeDialog(String qrCodeContent, int userId) {
+    private void showQrCodeDialog(String qrCodeContent, int walletUserId, int transferId) {
         // Tạo dialog
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_top_up_qr_popup);
@@ -113,7 +125,8 @@ public class TopUpActivity extends AppCompatActivity implements NumberPadFragmen
             dialog.dismiss();
             String amount = amountText.getText().toString();
             Intent intent = new Intent(TopUpActivity.this, TopUpSuccessActivity.class);
-            intent.putExtra("user_id", userId);
+            intent.putExtra("walletUserId", walletUserId);
+            intent.putExtra("transferId", transferId);
             intent.putExtra("amount", amount);
             startActivity(intent);
             finish();

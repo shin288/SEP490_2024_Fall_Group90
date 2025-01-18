@@ -1,15 +1,18 @@
 package com.example.ftopapplication.data.model;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 public class BankTransfer {
     private int transferId;
     private int walletUserId;
-    private String accountNumber;
+    private int accountNumber;
     private String bankName;
-    private int transferType; // 1 = Deposit, 0 = Withdraw
+    private boolean transferType; // 1 = Deposit, 0 = Withdraw
     private String transferDescription;
-    private String transferDate;
+    private Date transferDate;
     private boolean status;
-    private int amount;
+    private int transferAmount;
 
     // Getters and Setters
     public int getTransferId() {
@@ -28,11 +31,11 @@ public class BankTransfer {
         this.walletUserId = walletUserId;
     }
 
-    public String getAccountNumber() {
+    public Integer getAccountNumber() {
         return accountNumber;
     }
 
-    public void setAccountNumber(String accountNumber) {
+    public void setAccountNumber(Integer accountNumber) {
         this.accountNumber = accountNumber;
     }
 
@@ -44,11 +47,11 @@ public class BankTransfer {
         this.bankName = bankName;
     }
 
-    public int getTransferType() {
+    public boolean getTransferType() {
         return transferType;
     }
 
-    public void setTransferType(int transferType) {
+    public void setTransferType(boolean transferType) {
         this.transferType = transferType;
     }
 
@@ -60,13 +63,14 @@ public class BankTransfer {
         this.transferDescription = transferDescription;
     }
 
-    public String getTransferDate() {
+    public Date getTransferDate() {
         return transferDate;
     }
 
-    public void setTransferDate(String transferDate) {
+    public void setTransferDate(Date transferDate) {
         this.transferDate = transferDate;
     }
+
 
     public boolean isStatus() {
         return status;
@@ -76,11 +80,27 @@ public class BankTransfer {
         this.status = status;
     }
 
-    public int getAmount() {
-        return amount;
+    public void setAmount(Integer amount) {
+        this.transferAmount = amount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public Integer getAmount() {
+        return transferAmount;
+    }
+
+
+    @Override
+    public String toString() {
+        return "BankTransfer{" +
+                "transferId=" + transferId +
+                ", walletUserId=" + walletUserId +
+                ", accountNumber=" + accountNumber +
+                ", bankName='" + bankName + '\'' +
+                ", transferType=" + transferType +
+                ", transferDescription='" + transferDescription + '\'' +
+                ", transferDate='" + transferDate + '\'' +
+                ", status=" + status +
+                ", transferAmount=" + transferAmount +
+                '}';
     }
 }

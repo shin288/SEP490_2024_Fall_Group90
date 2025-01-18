@@ -1,16 +1,19 @@
 package com.example.ftopapplication.ui.topup;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import com.example.ftopapplication.data.model.BankTransfer;
+
 import com.example.ftopapplication.R;
+import com.example.ftopapplication.ui.home.HomeActivity;
 import com.example.ftopapplication.viewmodel.topup.TopUpViewModel;
 
 public class TopUpSuccessActivity extends AppCompatActivity {
@@ -21,6 +24,7 @@ public class TopUpSuccessActivity extends AppCompatActivity {
     private TopUpViewModel viewModel;
     private Handler handler = new Handler();
     private Runnable statusChecker;
+    private boolean isSuccessChecked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +38,9 @@ public class TopUpSuccessActivity extends AppCompatActivity {
         doneButton = findViewById(R.id.done_button);
 
         // Nhận dữ liệu từ Intent
-        int userId = getIntent().getIntExtra("user_id", -1);
-        String amount = getIntent().getStringExtra("amount");
+        int walletUserId = getIntent().getIntExtra("walletUserId", -1);
+        int transferId = getIntent().getIntExtra("transferId", -1);
+        int amount = getIntent().getIntExtra("amount",0);
 
         amountText.setText("Amount: " + amount);
 
@@ -43,29 +48,34 @@ public class TopUpSuccessActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(TopUpViewModel.class);
 
         // Hiển thị trạng thái Pending ban đầu
-        updateUIToPending();
+        updateUIToSuccess();
 
-        // Tự động kiểm tra trạng thái giao dịch sau mỗi 5 giây
-        statusChecker = new Runnable() {
-            @Override
-            public void run() {
-                viewModel.fetchBankTransfersByUserId(userId);
-                handler.postDelayed(this, 5000);
-            }
-        };
-        handler.post(statusChecker);
 
-        // Quan sát kết quả từ ViewModel
-        viewModel.getBankTransfersLiveData().observe(this, transfers -> {
-            boolean isSuccess = transfers.stream().anyMatch(BankTransfer::isStatus);
-            if (isSuccess) {
-                handler.removeCallbacks(statusChecker);
-                updateUIToSuccess();
+        viewModel.getTransferStatusLiveData().observe(this, transfer -> {
+            if (transfer != null) {
+                Log.d("TopUpStatus", "Dữ liệu nhận được: " + transfer.toString());
+                boolean status = transfer.isStatus();
+
+                Log.d("TopUpStatus", "Status: " + transfer.isStatus());
+                if (status && !isSuccessChecked) {
+                    isSuccessChecked = true;
+                    handler.removeCallbacks(statusChecker);
+                    updateUIToSuccess();
+                    Log.d("TopUpStatus", "Giao dịch thành công, đã dừng gọi API.");
+                } else if (!status) {
+                    updateUIToPending();
+                }
             }
         });
 
         // Nút hoàn thành
-        doneButton.setOnClickListener(v -> finish());
+        doneButton.setOnClickListener(v -> {
+            Intent intent = new Intent(TopUpSuccessActivity.this, HomeActivity.class);
+            intent.putExtra("user_id", walletUserId);  // Truyền walletUserId về HomeActivity
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void updateUIToPending() {
@@ -77,6 +87,12 @@ public class TopUpSuccessActivity extends AppCompatActivity {
     private void updateUIToSuccess() {
         statusMessage.setText("Top Up Success");
         statusIcon.setImageResource(R.drawable.ic_success);
-        findViewById(R.id.white_card).setBackgroundColor(Color.GREEN);
+        findViewById(R.id.white_card).setBackgroundColor(Color.WHITE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacks(statusChecker);  // Dừng kiểm tra khi thoát màn hình
     }
 }

@@ -104,8 +104,12 @@ public interface ApiService {
     @GET("api/user/searchapp")
     Call<List<User>> searchUsers(@Query("query") String query);
 
-    @GET("/api/payos/transactions")
-    Call<List<BankTransfer>> getAllBankTransfers();
+    @GET("/api/banktransfer/user/{walletUserId}")
+    Call<List<BankTransfer>> getAllBankTransfers(@Path("walletUserId") int walletUserId);
+
+    // API lấy giao dịch theo transferId
+    @GET("api/banktransfer/find/{transferId}")
+    Call<BankTransfer> getTransferById(@Path("transferId") int transferId);
 
 
 }

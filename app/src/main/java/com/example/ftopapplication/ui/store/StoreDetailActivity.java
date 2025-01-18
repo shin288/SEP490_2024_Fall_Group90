@@ -1,5 +1,6 @@
 package com.example.ftopapplication.ui.store;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,7 @@ import androidx.appcompat.widget.Toolbar;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,20 +54,23 @@ import java.util.Locale;
 public class StoreDetailActivity extends AppCompatActivity {
 
     private ImageView ivHeaderImage;
-    private TextView tvSummaryPrice, tvErrorMessage;
+    private TextView tvSummaryPrice, tvErrorMessage, tvOriginalTotal, tvVoucherDiscount;
     private Button btnCheckout;
     private RecyclerView rvProductList, rvVoucherList;
     private ProductAdapter productAdapter;
     private VoucherAdapter voucherAdapter;
 
     private LottieAnimationView lottieViewDetail;
+    private NestedScrollView detailScrollView;
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbar;
     private int previousOffset ;
+    private static final String BASE_URL = "http://172.20.80.1:8000";
 
 
     private StoreDetailViewModel viewModel;
+    private boolean isDetailVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +89,6 @@ public class StoreDetailActivity extends AppCompatActivity {
         }
 
         previousOffset = -1; // Giá trị mặc định ban đầu
-
         appBarLayout.addOnOffsetChangedListener((appBarLayout1, verticalOffset) -> {
             if (verticalOffset != previousOffset) {
                 previousOffset = verticalOffset;
@@ -103,7 +107,8 @@ public class StoreDetailActivity extends AppCompatActivity {
         });
 
         observeViewModel();
-        lottieViewDetail.setOnClickListener(v -> showDetailDialog());
+
+        lottieViewDetail.setOnClickListener(v -> toggleDetailDisplay());
     }
 
     private void initViews() {
@@ -113,8 +118,12 @@ public class StoreDetailActivity extends AppCompatActivity {
         tvSummaryPrice = findViewById(R.id.tv_summary_price);
         lottieViewDetail = findViewById(R.id.lottie_view_detail);
         btnCheckout = findViewById(R.id.btn_checkout);
+        detailScrollView = findViewById(R.id.detailScrollView);
+
+        tvOriginalTotal = findViewById(R.id.tv_original_total);
+        tvVoucherDiscount = findViewById(R.id.tv_voucher_discount);
         if (btnCheckout == null) {
-            Log.e("StoreDetailActivity", "btnCheckout is null. Check your layout file.");
+
         }
 
         tvErrorMessage = findViewById(R.id.tv_error_message);
@@ -123,13 +132,25 @@ public class StoreDetailActivity extends AppCompatActivity {
         collapsingToolbar = findViewById(R.id.collapsingToolbar);
 
         btnCheckout.setOnClickListener(v -> handleCheckout());
+
+        tvOriginalTotal.setVisibility(View.GONE);
+        tvVoucherDiscount.setVisibility(View.GONE);
     }
 
     private void setupRecyclerViews() {
         rvProductList.setLayoutManager(new LinearLayoutManager(this));
-        productAdapter = new ProductAdapter(List.of(), (totalQuantity, totalPrice) ->
-                tvSummaryPrice.setText(String.format(Locale.getDefault(), "Total amount: %d đ", (int) totalPrice))
-        );
+        productAdapter = new ProductAdapter(List.of(), (totalQuantity, totalPrice) -> {
+            updateBottomSheet();  // Cập nhật thông tin giá tiền khi thay đổi số lượng sản phẩm
+
+            // Kiểm tra nếu không chọn sản phẩm nào thì disable nút Checkout
+            if (totalQuantity > 0) {
+                btnCheckout.setEnabled(true);
+                btnCheckout.setBackgroundTintList(getResources().getColorStateList(R.color.blue_border));
+            } else {
+                btnCheckout.setEnabled(false);
+                btnCheckout.setBackgroundTintList(getResources().getColorStateList(R.color.gray));  // Màu xám khi disable
+            }
+        });
         rvProductList.setAdapter(productAdapter);
 
         rvVoucherList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -148,44 +169,59 @@ public class StoreDetailActivity extends AppCompatActivity {
                 int updatedTotalPrice = productAdapter.getTotalPrice();
                 tvSummaryPrice.setText(String.format(Locale.getDefault(), "Total amount: %d đ", updatedTotalPrice));
             }
+            updateBottomSheet();
         });
         rvVoucherList.setAdapter(voucherAdapter);
 
+        // Mặc định disable nút Checkout khi chưa chọn sản phẩm
+        btnCheckout.setEnabled(false);
+        btnCheckout.setBackgroundTintList(getResources().getColorStateList(R.color.gray));
+
+    }
+    private void updateBottomSheet() {
+        int originalTotalPrice = productAdapter.getOriginalTotalPrice();
+        Voucher selectedVoucher = voucherAdapter.getSelectedVoucher();
+
+        int discount = (selectedVoucher != null) ? (originalTotalPrice * selectedVoucher.getVoucherDiscount()) / 100 : 0;
+        int finalTotalPrice = originalTotalPrice - discount;
+
+        // Cập nhật thông tin trên Bottom Sheet
+        tvOriginalTotal.setText(String.format(Locale.getDefault(), "Original Total: %,d đ", originalTotalPrice));
+        tvVoucherDiscount.setText(String.format(Locale.getDefault(), "Voucher Discount: -%,d đ", discount));
+        tvSummaryPrice.setText(String.format(Locale.getDefault(), "Total amount: %,d đ", finalTotalPrice));
     }
 
-    private void showDetailDialog() {
-        int originalTotalPrice = productAdapter.getOriginalTotalPrice();  // Tổng tiền gốc
+
+    private void toggleDetailDisplay() {
+        if (isDetailVisible) {
+            tvOriginalTotal.setVisibility(View.GONE);
+            tvVoucherDiscount.setVisibility(View.GONE);
+            isDetailVisible = false;
+        } else {
+            showDetailAndScrollUp();
+            isDetailVisible = true;
+        }
+    }
+
+    // Hiển thị thông tin và scroll lên
+    private void showDetailAndScrollUp() {
+        int originalTotalPrice = productAdapter.getOriginalTotalPrice();
         int discountPercent = 0;
         int discountAmount = 0;
 
-        // Lấy voucher đã chọn và tính số tiền giảm giá
         Voucher selectedVoucher = voucherAdapter.getSelectedVoucher();
         if (selectedVoucher != null) {
-            discountPercent = selectedVoucher.getVoucherDiscount();  // Lấy % giảm giá
-            discountAmount = originalTotalPrice * discountPercent / 100;  // Tính số tiền giảm giá
+            discountPercent = selectedVoucher.getVoucherDiscount();
+            discountAmount = originalTotalPrice * discountPercent / 100;
         }
 
-        int finalTotalPrice = originalTotalPrice - discountAmount;  // Tính tổng tiền sau giảm
+        tvOriginalTotal.setText(String.format(Locale.getDefault(), "Original Total: %,d đ", originalTotalPrice));
+        tvVoucherDiscount.setText(String.format(Locale.getDefault(), "Voucher Discount: -%,d đ", discountAmount));
 
-        // Inflate dialog
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_price_detail, null);
-        TextView tvOriginalPrice = dialogView.findViewById(R.id.tv_original_price);
-        TextView tvDiscount = dialogView.findViewById(R.id.tv_discount);
-        TextView tvFinalPrice = dialogView.findViewById(R.id.tv_final_price);
-        Button btnClose = dialogView.findViewById(R.id.btn_close);
+        tvOriginalTotal.setVisibility(View.VISIBLE);
+        tvVoucherDiscount.setVisibility(View.VISIBLE);
 
-        // Hiển thị thông tin chi tiết
-        tvOriginalPrice.setText(String.format(Locale.getDefault(), "Original Total: %,d đ", originalTotalPrice));
-        tvDiscount.setText(String.format(Locale.getDefault(), "Voucher Discount: -%,d đ", discountAmount));
-        tvFinalPrice.setText(String.format(Locale.getDefault(), "Final Total: %,d đ", finalTotalPrice));
-
-        // Tạo và hiển thị dialog
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setView(dialogView)
-                .create();
-
-        btnClose.setOnClickListener(v -> dialog.dismiss());
-        dialog.show();
+        detailScrollView.post(() -> detailScrollView.fullScroll(View.FOCUS_UP));
     }
 
 
@@ -201,13 +237,14 @@ public class StoreDetailActivity extends AppCompatActivity {
 
     private void observeViewModel() {
         viewModel.getStoreLiveData().observe(this, store -> {
-            if (store != null) {
-                collapsingToolbar.post(() -> {
-                    collapsingToolbar.setTitle(store.getStoreName());
-                    Glide.with(this).load(store.getStoreImage().get(0))
-                            .placeholder(R.drawable.placeholder_image)
-                            .into(ivHeaderImage);
-                });
+            if (store != null && store.getStoreImage() != null && !store.getStoreImage().isEmpty()) {
+                // Load ảnh giống StoreAdapter
+                loadImage(this, ivHeaderImage, BASE_URL, store.getStoreImage().get(0));
+
+                // Cập nhật tiêu đề
+                collapsingToolbar.setTitle(store.getStoreName());
+            } else {
+                ivHeaderImage.setImageResource(R.drawable.placeholder_image);
             }
         });
 
@@ -227,6 +264,18 @@ public class StoreDetailActivity extends AppCompatActivity {
         viewModel.getErrorMessage().observe(this, this::showErrorMessage);
 
         viewModel.getIsLoading().observe(this, this::showLoading);
+    }
+
+    private void loadImage(Context context, ImageView imageView, String baseUrl, String imagePath) {
+        if (imagePath != null && !imagePath.isEmpty()) {
+            Glide.with(context)
+                    .load(baseUrl + imagePath)
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image)  // Hiển thị ảnh lỗi nếu load không thành công
+                    .into(imageView);
+        } else {
+            imageView.setImageResource(R.drawable.placeholder_image);
+        }
     }
 
     private void updateStoreInfo(Store store) {
@@ -265,11 +314,6 @@ public class StoreDetailActivity extends AppCompatActivity {
                     int totalPrice = productAdapter.getTotalPrice();
                     List<ProductOrder> selectedProducts = productAdapter.getSelectedProducts();
 
-                    Log.d("StoreDetailActivity", "User ID: " + userId);
-                    Log.d("StoreDetailActivity", "Store ID: " + storeId);
-                    Log.d("StoreDetailActivity", "Total Price: " + totalPrice);
-                    Log.d("StoreDetailActivity", "Selected Products: " + selectedProducts);
-
                     // Kiểm tra dữ liệu
                     if (userId == -1) {
                         showErrorMessage("User information is missing. Please log in again.");
@@ -295,9 +339,6 @@ public class StoreDetailActivity extends AppCompatActivity {
                             "Optional order note", // Ghi chú đơn hàng (tùy chọn)
                             totalPrice
                     );
-
-                    // Log request cho debug
-                    Log.d("StoreDetailActivity", "OrderTransactionRequest: " + request.toString());
 
                     // Truyền dữ liệu qua PinEntryActivity
                     Intent intent = new Intent(StoreDetailActivity.this, PinEntryActivity.class);

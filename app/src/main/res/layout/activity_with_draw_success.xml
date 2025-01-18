@@ -34,7 +34,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="750dp"
+            android:layout_height="800dp"
             android:padding="16dp">
 
             <!-- Biểu tượng trạng thái -->

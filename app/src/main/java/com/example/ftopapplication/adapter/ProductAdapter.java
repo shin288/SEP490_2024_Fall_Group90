@@ -128,6 +128,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         productQuantities.put(productId, currentQuantity);
         updateQuantityUI(holder, productId);
         notifyQuantityChanged();
+
+        // Gọi cập nhật tổng giá trị khi thay đổi số lượng
+        if (onQuantityChangeListener != null) {
+            onQuantityChangeListener.onQuantityChanged(getOriginalTotalPrice(), getTotalPrice());
+        }
     }
 
     private void updateQuantityUI(ProductViewHolder holder, int productId) {

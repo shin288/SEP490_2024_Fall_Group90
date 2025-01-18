@@ -1,5 +1,6 @@
 package com.example.ftopapplication.ui.transaction;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,14 +8,19 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.ftopapplication.R;
+import com.example.ftopapplication.data.model.BankTransfer;
 import com.example.ftopapplication.data.model.Transaction;
+import com.example.ftopapplication.ui.home.HomeActivity;
+import com.example.ftopapplication.ui.send.SendSuccessActivity;
+import com.example.ftopapplication.ui.store.StoreDetailActivity;
+import com.example.ftopapplication.ui.topup.TopUpSuccessActivity;
+import com.example.ftopapplication.ui.withdraw.WithDrawSuccess;
 import com.example.ftopapplication.viewmodel.transaction.TransactionHistoryViewModel;
 
 import java.util.List;
@@ -35,30 +41,22 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_history);
 
-        // Lấy userId từ Intent
         userId = getIntent().getIntExtra("user_id", -1);
-
-        // Khởi tạo ViewModel
         viewModel = new ViewModelProvider(this).get(TransactionHistoryViewModel.class);
 
-        // Khởi tạo giao diện
         btnAll = findViewById(R.id.btn_all);
         btnIncome = findViewById(R.id.btn_income);
         btnExpense = findViewById(R.id.btn_expense);
         transactionListContainer = findViewById(R.id.transaction_list_container);
         btnBack = findViewById(R.id.btn_back);
 
-        // Thiết lập nút Back
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> backToHome());
 
-        // Quan sát dữ liệu từ ViewModel
         setupObservers();
 
-        // Mặc định hiển thị tất cả giao dịch
         setActiveButton(btnAll);
         viewModel.fetchAllTransactions(userId);
 
-        // Thiết lập nút lọc giao dịch
         btnAll.setOnClickListener(v -> {
             setActiveButton(btnAll);
             viewModel.filterTransactions("all", userId);
@@ -101,10 +99,10 @@ public class TransactionHistoryActivity extends AppCompatActivity {
                 ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
     }
 
-    private void updateTransactionList(List<Transaction> transactions) {
-        transactionListContainer.removeAllViews(); // Xóa danh sách cũ
+    private void updateTransactionList(List<Object> transactions) {
+        transactionListContainer.removeAllViews();
 
-        for (Transaction transaction : transactions) {
+        for (Object item : transactions) {
             View transactionItemView = LayoutInflater.from(this).inflate(R.layout.transaction_item, transactionListContainer, false);
 
             TextView titleTextView = transactionItemView.findViewById(R.id.transaction_title);
@@ -112,18 +110,80 @@ public class TransactionHistoryActivity extends AppCompatActivity {
             TextView amountTextView = transactionItemView.findViewById(R.id.transaction_amount);
             ImageView iconImageView = transactionItemView.findViewById(R.id.transaction_icon);
 
-            // Thiết lập dữ liệu
-            titleTextView.setText(transaction.getTransactionDescription());
-            dateTextView.setText(transaction.getTransactionDate().toString());
-            amountTextView.setText((transaction.getReceiveUserId() == userId ? "+" : "-") + "$" + transaction.getTransactionAmount());
-            amountTextView.setTextColor(transaction.getReceiveUserId() == userId
-                    ? getResources().getColor(R.color.income_color)
-                    : getResources().getColor(R.color.expense_color));
-            iconImageView.setImageResource(transaction.getReceiveUserId() == userId ? R.drawable.ic_income : R.drawable.ic_expense);
+            if (item instanceof Transaction) {
+                Transaction transaction = (Transaction) item;
+                titleTextView.setText(transaction.getTransactionDescription());
+                dateTextView.setText(transaction.getTransactionDate().toString());
+                amountTextView.setText((transaction.getReceiveUserId() == userId ? "+" : "-")  + transaction.getTransactionAmount() + " d");
+                iconImageView.setImageResource(transaction.getReceiveUserId() == userId ? R.drawable.ic_income : R.drawable.ic_expense);
 
-            // Thêm vào danh sách
+                transactionItemView.setOnClickListener(v -> openTransactionDetail(transaction));
+
+            } else if (item instanceof BankTransfer) {
+                BankTransfer transfer = (BankTransfer) item;
+                String type = (transfer.getTransferType() ? "Top-up" : "Withdraw");
+                titleTextView.setText(type);
+                dateTextView.setText(transfer.getTransferDate().toString());
+                amountTextView.setText((transfer.getTransferType() ? "+" : "-")  + transfer.getAmount() + " d");
+                iconImageView.setImageResource(transfer.getTransferType() ? R.drawable.ic_income : R.drawable.ic_expense);
+
+                transactionItemView.setOnClickListener(v -> openBankTransferDetail(transfer));
+            }
+
             transactionListContainer.addView(transactionItemView);
         }
+    }
+
+    private void openTransactionDetail(Transaction transaction) {
+        Intent intent;
+
+        switch (transaction.getTransactionDescription().toLowerCase()) {
+            case "send":
+                intent = new Intent(this, SendSuccessActivity.class);
+                intent.putExtra("amount", transaction.getTransactionAmount());
+                intent.putExtra("name", transaction.getTransactionDescription());
+                intent.putExtra("time", transaction.getTransactionDate().toString());
+                break;
+
+            case "store_order":
+                intent = new Intent(this, SendSuccessActivity.class);
+                intent.putExtra("amount", transaction.getTransactionAmount());
+                intent.putExtra("store_name", transaction.getTransactionDescription());
+                break;
+
+            default:
+                return;
+        }
+
+        intent.putExtra("user_id", userId);
+        startActivity(intent);
+    }
+
+    private void openBankTransferDetail(BankTransfer transfer) {
+        Intent intent;
+
+        if (transfer.getTransferType()) { // Top-up
+            intent = new Intent(this, TopUpSuccessActivity.class);
+            intent.putExtra("walletUserId", transfer.getWalletUserId());
+            intent.putExtra("transferId", transfer.getTransferId());
+            intent.putExtra("amount", transfer.getAmount());
+        } else { // Withdraw
+            intent = new Intent(this, WithDrawSuccess.class);
+            intent.putExtra("amount", transfer.getAmount());
+            intent.putExtra("bank_name", transfer.getBankName());
+            intent.putExtra("account_number", transfer.getAccountNumber());
+        }
+
+        intent.putExtra("user_id", userId);
+        startActivity(intent);
+    }
+
+
+    private void backToHome() {
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.putExtra("user_id", userId);
+        startActivity(intent);
+        finish();
     }
 
     private void setActiveButton(Button activeButton) {
@@ -131,11 +191,6 @@ public class TransactionHistoryActivity extends AppCompatActivity {
         btnIncome.setBackgroundResource(R.drawable.rounded_button_background_disabled);
         btnExpense.setBackgroundResource(R.drawable.rounded_button_background_disabled);
 
-        btnAll.setTextColor(getResources().getColor(R.color.disabled_text_color));
-        btnIncome.setTextColor(getResources().getColor(R.color.disabled_text_color));
-        btnExpense.setTextColor(getResources().getColor(R.color.disabled_text_color));
-
         activeButton.setBackgroundResource(R.drawable.rounded_button_background);
-        activeButton.setTextColor(getResources().getColor(R.color.active_text_color));
     }
 }

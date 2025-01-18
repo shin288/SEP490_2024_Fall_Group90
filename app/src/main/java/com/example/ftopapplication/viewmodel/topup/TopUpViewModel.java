@@ -1,5 +1,7 @@
 package com.example.ftopapplication.viewmodel.topup;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -18,17 +20,27 @@ import retrofit2.Response;
 public class TopUpViewModel extends ViewModel {
 
     private final TopUpRepository repository;
-    private final BankTransferRepository bankTransferRepository;
+    // LiveData để trả về QR Code, TransferId, Trạng thái giao dịch và lỗi
     private final MutableLiveData<String> qrCodeLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Integer> transferIdLiveData = new MutableLiveData<>();
+    private final MutableLiveData<BankTransfer> transferStatusLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
 
     public TopUpViewModel() {
         repository = new TopUpRepository();
-        bankTransferRepository = new BankTransferRepository();
     }
 
+    // Getter cho LiveData
     public LiveData<String> getQrCodeLiveData() {
         return qrCodeLiveData;
+    }
+
+    public LiveData<Integer> getTransferIdLiveData() {
+        return transferIdLiveData;
+    }
+
+    public LiveData<BankTransfer> getTransferStatusLiveData() {
+        return transferStatusLiveData;
     }
 
     public LiveData<String> getErrorLiveData() {
@@ -43,8 +55,9 @@ public class TopUpViewModel extends ViewModel {
 
         repository.topUp(walletUserId, amount, new TopUpRepository.TopUpCallback() {
             @Override
-            public void onSuccess(String qrCode) {
-                qrCodeLiveData.postValue(qrCode);
+            public void onSuccess(String qrCode, int transferId) {
+                qrCodeLiveData.postValue(qrCode);       // Trả về QR Code
+                transferIdLiveData.postValue(transferId); // Trả về TransferId để kiểm tra sau
             }
 
             @Override
@@ -54,31 +67,25 @@ public class TopUpViewModel extends ViewModel {
         });
     }
 
-    private final MutableLiveData<List<BankTransfer>> bankTransfersLiveData = new MutableLiveData<>();
-
-    public LiveData<List<BankTransfer>> getBankTransfersLiveData() {
-        return bankTransfersLiveData;
-    }
-
-    // Lọc danh sách giao dịch theo userId
-    public void fetchBankTransfersByUserId(int userId) {
-        bankTransferRepository.getAllBankTransfers().enqueue(new Callback<List<BankTransfer>>() {
+    public void checkTransferStatus(int transferId) {
+        repository.checkTransferStatus(transferId, new TopUpRepository.TransferStatusCallback() {
             @Override
-            public void onResponse(Call<List<BankTransfer>> call, Response<List<BankTransfer>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    // Lọc giao dịch theo walletUserId
-                    List<BankTransfer> filteredTransfers = response.body().stream()
-                            .filter(transfer -> transfer.getWalletUserId() == userId)
-                            .collect(Collectors.toList());
-                    bankTransfersLiveData.postValue(filteredTransfers);
-                } else {
-                    errorLiveData.postValue("Không thể lấy dữ liệu giao dịch.");
+            public void onSuccess(BankTransfer transfer) {
+                if (transfer != null) {
+
+                    boolean status = transfer.isStatus();
+                    if (status) {
+                        Log.d("TopUpStatus", "Giao dịch đã thành công.");
+                    } else {
+                        Log.d("TopUpStatus", "Giao dịch chưa thành công.");
+                    }
+                    transferStatusLiveData.postValue(transfer);
                 }
             }
 
             @Override
-            public void onFailure(Call<List<BankTransfer>> call, Throwable t) {
-                errorLiveData.postValue("Lỗi: " + t.getMessage());
+            public void onFailure(String error) {
+                errorLiveData.postValue(error);
             }
         });
     }

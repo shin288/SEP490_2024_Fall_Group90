@@ -19,8 +19,12 @@ public class BankTransferRepository {
         return apiService.withdraw(bankTransfer);
     }
 
-    public Call<List<BankTransfer>> getAllBankTransfers() {
-        return apiService.getAllBankTransfers();
+    public Call<List<BankTransfer>> getAllBankTransfers(int walletUserId) {
+        return apiService.getAllBankTransfers(walletUserId);
+    }
+
+    public Call<BankTransfer> getTransferById(int transferId){
+        return apiService.getTransferById(transferId);
     }
 
 }

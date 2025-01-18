@@ -16,7 +16,9 @@
         <!-- Loại bỏ backgroundTint mặc định -->
         <item name="colorButtonNormal">@null</item>
         <item name="android:colorButtonNormal">@null</item>
-        <item name="materialButtonStyle">@null</item> <!-- Đảm bảo nút sử dụng style của bạn -->
+        <item name="materialButtonStyle">@null</item>
+        <item name="android:backgroundTint">@null</item>
+        <!-- Đảm bảo nút sử dụng style của bạn -->
 
     </style>
 

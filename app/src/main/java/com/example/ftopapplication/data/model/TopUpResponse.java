@@ -4,6 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class TopUpResponse {
 
+    @SerializedName("bankTransfer")  // Thêm trường bankTransfer
+    private BankTransfer bankTransfer;
+
     @SerializedName("walletBalance")
     private int walletBalance;
 
@@ -30,6 +33,11 @@ public class TopUpResponse {
 
     public PaymentLink getPaymentLink() {
         return paymentLink;
+    }
+
+    // Getter cho bankTransfer
+    public BankTransfer getBankTransfer() {
+        return bankTransfer;
     }
 
     public static class PaymentLink {

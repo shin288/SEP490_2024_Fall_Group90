@@ -1,8 +1,10 @@
 package com.example.ftopapplication.ui.send;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
@@ -17,6 +19,7 @@ public class SendActivity extends AppCompatActivity implements NumberPadFragment
     private TextView tvAmount;
     private Button btnContinue;
     private SendViewModel sendViewModel;
+    private ImageView btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,9 @@ public class SendActivity extends AppCompatActivity implements NumberPadFragment
 
         tvAmount = findViewById(R.id.tv_amount);
         btnContinue = findViewById(R.id.btn_continue);
+        btnBack = findViewById(R.id.btn_back);
+
+        btnBack.setOnClickListener(v -> finish());
 
         // Observe LiveData
         sendViewModel.getAmount().observe(this, amount -> {

@@ -1,5 +1,6 @@
 package com.example.ftopapplication.data.repository;
 
+import com.example.ftopapplication.data.model.BankTransfer;
 import com.example.ftopapplication.data.model.TopUpRequest;
 import com.example.ftopapplication.data.model.TopUpResponse;
 import com.example.ftopapplication.network.ApiClient;
@@ -18,7 +19,7 @@ public class TopUpRepository {
     }
 
     public interface TopUpCallback {
-        void onSuccess(String qrCode);
+        void onSuccess(String qrCode, int transferId);
         void onError(String error);
     }
 
@@ -28,7 +29,9 @@ public class TopUpRepository {
             @Override
             public void onResponse(Call<TopUpResponse> call, Response<TopUpResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    callback.onSuccess(response.body().getPaymentLink().getQrCode());
+                    int transferId = response.body().getBankTransfer().getTransferId();
+                    String qrCode = response.body().getPaymentLink().getQrCode();
+                    callback.onSuccess(qrCode, transferId);
                 } else {
                     callback.onError(response.message());
                 }
@@ -37,6 +40,31 @@ public class TopUpRepository {
             @Override
             public void onFailure(Call<TopUpResponse> call, Throwable t) {
                 callback.onError(t.getMessage());
+            }
+        });
+    }
+
+    // Interface callback để xử lý kết quả kiểm tra trạng thái
+    public interface TransferStatusCallback {
+        void onSuccess(BankTransfer transfer);
+        void onFailure(String error);
+    }
+
+    // 4️⃣ API kiểm tra trạng thái giao dịch theo TransferId
+    public void checkTransferStatus(int transferId, TransferStatusCallback callback) {
+        apiService.getTransferById(transferId).enqueue(new Callback<BankTransfer>() {
+            @Override
+            public void onResponse(Call<BankTransfer> call, Response<BankTransfer> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());  // Trả về kết quả giao dịch
+                } else {
+                    callback.onFailure("Không tìm thấy giao dịch.");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BankTransfer> call, Throwable t) {
+                callback.onFailure("Lỗi kết nối: " + t.getMessage());
             }
         });
     }

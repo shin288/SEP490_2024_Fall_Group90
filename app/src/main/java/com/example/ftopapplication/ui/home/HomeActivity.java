@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ftopapplication.R;
 import com.example.ftopapplication.adapter.StoreAdapter;
 import com.example.ftopapplication.adapter.VoucherAdapter;
+import com.example.ftopapplication.ui.profile.ProfileSettingActivity;
 import com.example.ftopapplication.ui.send.SendActivity;
 import com.example.ftopapplication.ui.store.StoreDetailActivity;
 import com.example.ftopapplication.ui.topup.TopUpActivity;
@@ -175,10 +176,17 @@ public class HomeActivity extends AppCompatActivity {
         ImageView btnRequest = findViewById(R.id.btn_request);
         if (btnRequest != null) {
             btnRequest.setOnClickListener(v -> {
-                Intent intent = new Intent(HomeActivity.this, WithDrawActivity.class);
                 int userId = getIntent().getIntExtra("user_id", -1);
-                intent.putExtra("user_id", userId);
-                startActivity(intent);
+
+                viewModel.getUserLiveData().observe(this, user -> {
+                    if (user != null) {
+                        int balance = user.getWalletBalance(); // Lấy số dư ví từ LiveData
+                        Intent intent = new Intent(HomeActivity.this, WithDrawActivity.class);
+                        intent.putExtra("user_id", userId);
+                        intent.putExtra("balance", balance); // Truyền balance
+                        startActivity(intent);
+                    }
+                });
             });
         } else {
             Log.e("HomeActivity", "btn_request not exist in layout");
@@ -197,10 +205,18 @@ public class HomeActivity extends AppCompatActivity {
             if (itemId == R.id.menu_home) {
                 return true;
             } else if (itemId == R.id.menu_cashflow) {
+                int balance = viewModel.getUserLiveData().getValue().getWalletBalance();  // Lấy số dư
                 Intent intent = new Intent(HomeActivity.this, StaticActivity.class);
+                intent.putExtra("user_id", userId); // Truyền userId
+                intent.putExtra("balance", balance);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.menu_profile) {
+                Intent intent = new Intent(HomeActivity.this, ProfileSettingActivity.class);
                 intent.putExtra("user_id", userId); // Truyền userId
                 startActivity(intent);
                 return true;
+
             } else {
                 return false;
             }

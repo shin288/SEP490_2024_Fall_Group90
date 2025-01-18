@@ -70,6 +70,7 @@ public class StaticActivity extends AppCompatActivity {
         // Fetch all transactions for the user
         if (userId != -1) {
             viewModel.fetchTransactionSummary(userId);
+            viewModel.fetchTransactions(userId);
         } else {
             showMotionToast("Error", "User ID not found!", MotionToastStyle.ERROR);
         }
@@ -82,18 +83,17 @@ public class StaticActivity extends AppCompatActivity {
 
     private void setupObservers() {
         // Observe current balance
-        viewModel.getBalanceLiveData().observe(this, balance -> {
-            currentBalanceTextView.setText(String.format("$%,d", balance));
-        });
+        int balance = getIntent().getIntExtra("balance", 0);
+        currentBalanceTextView.setText(String.format("%d đ", balance));
 
         // Observe income
         viewModel.getIncomeLiveData().observe(this, income -> {
-            incomeTextView.setText(String.format("$%,d", income));
+            incomeTextView.setText(String.format("%d", income));
         });
 
         // Observe expense
         viewModel.getExpenseLiveData().observe(this, expense -> {
-            expenseTextView.setText(String.format("$%,d", expense));
+            expenseTextView.setText(String.format("%d", expense));
         });
 
         // Observe transaction list
@@ -162,18 +162,23 @@ public class StaticActivity extends AppCompatActivity {
 
 
     private void updateTransactionList(List<Transaction> transactions) {
-        transactionHistoryContainer.removeAllViews(); // Clear previous items
+        transactionHistoryContainer.removeAllViews();  // Xóa dữ liệu cũ
 
-        for (Transaction transaction : transactions) {
+        int maxTransactions = Math.min(3, transactions.size());  // Giới hạn 3 giao dịch
+
+        for (int i = 0; i < maxTransactions; i++) {
+            Transaction transaction = transactions.get(i);
+
             String title = transaction.getTransactionDescription();
-            String date = transaction.getTransactionDate().toString(); // Format if needed
-            String amount = (transaction.isStatus() ? "+" : "-") + "$" + transaction.getTransactionAmount();
-            String color = transaction.isStatus() ? "#00FF00" : "#FF0000"; // Green for income, red for expense
+            String date = transaction.getTransactionDate().toString();
+            String amount = (transaction.isStatus() ? "+" : "-") + transaction.getTransactionAmount() + " đ";
+            String color = transaction.isStatus() ? "#00FF00" : "#FF0000";  // Xanh: thu, Đỏ: chi
             int iconRes = transaction.isStatus() ? R.drawable.ic_income : R.drawable.ic_expense;
 
             addTransactionItem(title, date, amount, iconRes, color);
         }
     }
+
 
     private int getDayOfWeek(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -189,8 +194,9 @@ public class StaticActivity extends AppCompatActivity {
         float[] dailyExpense = new float[7];
 
         int userId = getIntent().getIntExtra("user_id", -1);
+
         for (Transaction transaction : transactions) {
-            int dayOfWeek = getDayOfWeek(transaction.getTransactionDate()); // Convert date to day of week
+            int dayOfWeek = getDayOfWeek(transaction.getTransactionDate());
             if (transaction.getReceiveUserId() == userId && transaction.isStatus()) {
                 dailyIncome[dayOfWeek] += transaction.getTransactionAmount();
             } else if (transaction.getTransferUserId() == userId && transaction.isStatus()) {
@@ -215,8 +221,9 @@ public class StaticActivity extends AppCompatActivity {
         moneyTrackerChart.setData(barData);
         moneyTrackerChart.groupBars(0f, 0.2f, 0.02f);
         moneyTrackerChart.getDescription().setEnabled(false);
-        moneyTrackerChart.invalidate();
+        moneyTrackerChart.invalidate();  // Làm mới biểu đồ
     }
+
 
     private void addTransactionItem(String title, String date, String amount, int iconRes, String color) {
         View transactionItemView = LayoutInflater.from(this).inflate(R.layout.transaction_item, transactionHistoryContainer, false);

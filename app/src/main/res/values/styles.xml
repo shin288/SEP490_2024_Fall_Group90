@@ -80,4 +80,12 @@
         <item name="android:textSize">20sp</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+    <style name="RoundedButton">
+        <item name="android:background">@drawable/rounded_button</item>
+        <item name="backgroundTint">@null</item>
+
+        <item name="android:textStyle">bold</item>
+
+    </style>
 </resources>

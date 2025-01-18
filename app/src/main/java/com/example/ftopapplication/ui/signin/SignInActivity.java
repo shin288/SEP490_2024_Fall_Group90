@@ -59,13 +59,7 @@ public class SignInActivity extends AppCompatActivity {
             String password = edtPassword.getText().toString().trim();
 
             if (emailPhone.isEmpty() || password.isEmpty()) {
-                MotionToast.Companion.darkColorToast(this,
-                        "Warning",
-                        "Please fill all fields!",
-                        MotionToastStyle.WARNING,
-                        MotionToast.GRAVITY_BOTTOM,
-                        MotionToast.LONG_DURATION,
-                        ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
+                showMotionToast("Warning", "Please fill all fields!", MotionToastStyle.WARNING);
             } else {
                 signInViewModel.login(emailPhone, password);
             }
@@ -79,13 +73,7 @@ public class SignInActivity extends AppCompatActivity {
         // Quan sát trạng thái thành công
         signInViewModel.getLoginSuccess().observe(this, success -> {
             if (success) {
-                MotionToast.Companion.darkColorToast(this,
-                        "Success",
-                        "Login Successfully!",
-                        MotionToastStyle.SUCCESS,
-                        MotionToast.GRAVITY_BOTTOM,
-                        MotionToast.LONG_DURATION,
-                        ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
+                showMotionToast("Success", "Login Successfully!", MotionToastStyle.SUCCESS);
 
                 // Lấy access_token từ SharedPreferences
                 String accessToken = getSharedPreferences("UserSession", MODE_PRIVATE)
@@ -102,12 +90,7 @@ public class SignInActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    MotionToast.Companion.darkColorToast(this,"Error",
-                            "Access token not found!",
-                            MotionToastStyle.ERROR,
-                            MotionToast.GRAVITY_BOTTOM,
-                            MotionToast.LONG_DURATION,
-                            ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular));
+                    showMotionToast("Error", "Access token not found!", MotionToastStyle.ERROR);
                 }
             }
         });
@@ -115,8 +98,20 @@ public class SignInActivity extends AppCompatActivity {
         // Quan sát thông báo lỗi
         signInViewModel.getErrorMessage().observe(this, error -> {
             if (error != null) {
-                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                showMotionToast("Error", "Email or Password not correctly, Please Try again!",MotionToastStyle.ERROR);
             }
         });
+    }
+
+    private void showMotionToast(String title, String message, MotionToastStyle style) {
+        MotionToast.Companion.darkColorToast(
+                this,
+                title,
+                message,
+                style,
+                MotionToast.GRAVITY_BOTTOM,
+                MotionToast.LONG_DURATION,
+                ResourcesCompat.getFont(this, www.sanju.motiontoast.R.font.helvetica_regular)
+        );
     }
 }

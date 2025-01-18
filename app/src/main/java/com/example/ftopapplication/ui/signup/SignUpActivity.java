@@ -63,7 +63,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
 
             if (!isValidEmail(email)) {
-                showToast("Invalid Email", "Email must end with @fpt.edu.vn", MotionToastStyle.ERROR);
+                showToast("Invalid Email", "Email must be in correct format and end with @fpt.edu.vn", MotionToastStyle.ERROR);
                 return;
             }
 
@@ -88,7 +88,10 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private boolean isValidEmail(String email) {
-        return email.endsWith("@fpt.edu.vn") && Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        // Regex kiểm tra trước @ không có ký tự đặc biệt hoặc dấu cách
+        String emailRegex = "^[A-Za-z0-9._%+-]+@fpt\\.edu\\.vn$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        return pattern.matcher(email).matches();
     }
 
     private boolean isValidPhone(String phone) {
