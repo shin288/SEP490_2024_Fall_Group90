@@ -136,23 +136,15 @@ public class TransactionHistoryActivity extends AppCompatActivity {
 
     private void openTransactionDetail(Transaction transaction) {
         Intent intent;
+        String description = transaction.getTransactionDescription().toLowerCase();
 
-        switch (transaction.getTransactionDescription().toLowerCase()) {
-            case "send":
-                intent = new Intent(this, SendSuccessActivity.class);
-                intent.putExtra("amount", transaction.getTransactionAmount());
-                intent.putExtra("name", transaction.getTransactionDescription());
-                intent.putExtra("time", transaction.getTransactionDate().toString());
-                break;
-
-            case "store_order":
-                intent = new Intent(this, SendSuccessActivity.class);
-                intent.putExtra("amount", transaction.getTransactionAmount());
-                intent.putExtra("store_name", transaction.getTransactionDescription());
-                break;
-
-            default:
-                return;
+        if (description.contains("transfer via app") || description.contains("transfer for order ")) {
+            intent = new Intent(this, SendSuccessActivity.class);
+            intent.putExtra("amount", transaction.getTransactionAmount());
+            intent.putExtra("time", transaction.getTransactionDate().toString());
+        } else {
+            showMotionToast("Error", "No detailed view for this transaction.", MotionToastStyle.ERROR);
+            return;
         }
 
         intent.putExtra("user_id", userId);

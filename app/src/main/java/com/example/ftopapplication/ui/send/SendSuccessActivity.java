@@ -21,36 +21,29 @@ public class SendSuccessActivity extends AppCompatActivity {
         setContentView(R.layout.activity_send_success);
 
         tvAmount = findViewById(R.id.transfer_amount);
-        tvName = findViewById(R.id.destination_name);
-        tvAccountNumber = findViewById(R.id.destination_account_number);
+
         tvTime = findViewById(R.id.transfer_time);
 
-        // Lấy dữ liệu từ Intent
+        // Nhận dữ liệu từ Intent
         Intent intent = getIntent();
-        String amount = intent.getStringExtra("amount");
-        String name = intent.getStringExtra("name");
-
+        int amount = intent.getIntExtra("amount", 0);
         String time = intent.getStringExtra("time");
 
         // Gán dữ liệu vào các TextView
-        tvAmount.setText(amount);
-        tvName.setText(name);
+        tvAmount.setText(String.format("%,d đ", amount));  // Hiển thị số tiền đúng định dạng
+        tvTime.setText(time != null ? time : "N/A");
 
-        tvTime.setText(time);
-
-        // Xử lý sự kiện nút "Done"
+        // Nút "Done" quay lại Home
         Button doneButton = findViewById(R.id.done_button);
         doneButton.setOnClickListener(v -> {
             Intent homeIntent = new Intent(SendSuccessActivity.this, HomeActivity.class);
             int userId = getIntent().getIntExtra("user_id", -1);
             if (userId != -1) {
                 homeIntent.putExtra("user_id", userId);
-            } else {
-                Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show();
             }
-            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Xóa stack
+            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(homeIntent);
-            finish(); // Kết thúc SendSuccessActivity
+            finish();
         });
     }
 }

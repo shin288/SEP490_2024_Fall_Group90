@@ -90,7 +90,7 @@ public class PinEntryViewModel extends ViewModel {
                 + "\"transferUserId\": " + senderUserId + ","
                 + "\"receiveUserId\": " + receiverUserId + ","
                 + "\"amount\": " + amount + ","
-                + "\"description\": \"Chuyển tiền từ ứng dụng\","
+                + "\"description\": \"Transfer via app\","
                 + "\"status\": false"
                 + "}";
 

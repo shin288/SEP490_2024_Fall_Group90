@@ -249,7 +249,7 @@ public class PinEntryActivity extends AppCompatActivity implements PinNumberPadF
     private void navigateToSuccessScreen(int amount, String message) {
         Intent intent = new Intent(this, SendSuccessActivity.class);
         intent.putExtra("user_id", userId);
-        intent.putExtra("amount", String.format("%d đ", amount));
+        intent.putExtra("amount",  amount);
         intent.putExtra("message", message);
         startActivity(intent);
         finish();

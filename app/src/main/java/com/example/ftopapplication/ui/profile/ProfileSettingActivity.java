@@ -34,7 +34,7 @@ public class ProfileSettingActivity extends AppCompatActivity {
         edtEmail = findViewById(R.id.edt_email);
         edtPhone = findViewById(R.id.edt_phone);
 
-        btnSaveChange = findViewById(R.id.btn_save_change);
+
         btnLogout = findViewById(R.id.btn_logout);
 
         // Lấy user_id từ Intent
@@ -56,13 +56,9 @@ public class ProfileSettingActivity extends AppCompatActivity {
         // Xử lý sự kiện Logout
         btnLogout.setOnClickListener(v -> logoutUser());
 
-        // Xử lý sự kiện Save Change
-        btnSaveChange.setOnClickListener(v -> saveProfileChanges());
+
     }
 
-    /**
-     * Quan sát dữ liệu từ ViewModel
-     */
     private void setupObservers() {
         viewModel.getUserLiveData().observe(this, user -> {
             if (user != null) {
@@ -77,9 +73,7 @@ public class ProfileSettingActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Xử lý sự kiện Logout
-     */
+
     private void logoutUser() {
         showMotionToast("Logout", "You have successfully logged out!", MotionToastStyle.SUCCESS);
 
@@ -89,16 +83,6 @@ public class ProfileSettingActivity extends AppCompatActivity {
         finish();
     }
 
-    /**
-     * Xử lý lưu thay đổi hồ sơ
-     */
-    private void saveProfileChanges() {
-        showMotionToast("Update", "Profile updated successfully!", MotionToastStyle.SUCCESS);
-    }
-
-    /**
-     * Hiển thị MotionToast
-     */
     private void showMotionToast(String title, String message, MotionToastStyle style) {
         MotionToast.Companion.darkColorToast(
                 this,
